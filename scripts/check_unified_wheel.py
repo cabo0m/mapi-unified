@@ -41,7 +41,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as td:
         output = Path(td)
         completed = subprocess.run(
-            [sys.executable, "-m", "pip", "wheel", str(ROOT), "--no-deps", "--no-build-isolation", "-w", str(output)],
+            [sys.executable, "-m", "pip", "wheel", str(ROOT), "--no-deps", "-w", str(output)],
             capture_output=True,
             text=True,
             encoding="utf-8",

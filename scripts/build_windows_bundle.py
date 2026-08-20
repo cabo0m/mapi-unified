@@ -27,7 +27,7 @@ def main() -> int:
         wheel_dir = Path(td) / "wheel"
         wheel_dir.mkdir()
         built = subprocess.run(
-            [sys.executable, "-m", "pip", "wheel", str(ROOT), "--no-deps", "--no-build-isolation", "-w", str(wheel_dir)],
+            [sys.executable, "-m", "pip", "wheel", str(ROOT), "--no-deps", "-w", str(wheel_dir)],
             check=False, capture_output=True, text=True, encoding="utf-8", errors="replace",
         )
         if built.returncode != 0:

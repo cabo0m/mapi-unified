@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
+
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_windows_install_scripts_parse() -> None:
+    if os.name != "nt":
+        pytest.skip("Windows-only PowerShell parser contract")
     if not (ROOT / "install-windows.ps1").exists():
         raise AssertionError("Windows installer missing")
     command = (
