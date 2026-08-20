@@ -73,6 +73,7 @@ def test_server_module_rebinds_owned_runtime_handlers() -> None:
     assert sources["recall_memory"] == "app.runtime.server_runtime"
     assert sources["get_sandman_canonical_status"] == "server_core"
     assert "run_sandman_v1" not in sources
+    assert sources["run_shell"] == "app.runtime.admin_tools"
     assert sources["run_powershell"] == "app.runtime.admin_tools"
     assert sources["run_pytest"] == "app.runtime.admin_tools"
     assert sources["git_push"] == "app.runtime.admin_tools"

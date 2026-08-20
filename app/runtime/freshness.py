@@ -48,6 +48,7 @@ STALE_ADMIN_RECOVERY_ACTIONS = frozenset(
         "insert_after_marker",
         "replace_once",
         "delete_path",
+        "run_shell",
         "run_powershell",
         "run_pytest",
         "git_status",

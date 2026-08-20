@@ -11,6 +11,9 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
+from mapi_platform.selector import current_platform
+from mapi_platform.shell import shell_command, shell_name
+
 
 def resolve_command_workdir(*, root: str | Path, workdir: str | None = None) -> Path:
     if workdir is None or not str(workdir).strip():
@@ -50,15 +53,27 @@ def run_subprocess_command(command: list[str], *, cwd: Path, timeout_seconds: in
         }
 
 
-def run_powershell_command(*, root: str | Path, script: str, workdir: str | None = None, timeout_seconds: int = 60) -> dict[str, Any]:
+def run_shell_command(*, root: str | Path, script: str, workdir: str | None = None, timeout_seconds: int = 60) -> dict[str, Any]:
     if not isinstance(script, str) or not script.strip():
         return {"status": "error", "error": "script must be a non-empty string"}
     timeout_seconds = max(1, min(int(timeout_seconds or 60), 600))
-    return run_subprocess_command(
-        ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script],
+    try:
+        command = shell_command(script)
+    except RuntimeError as exc:
+        return {"status": "error", "error": str(exc), "shell": shell_name()}
+    result = run_subprocess_command(
+        command,
         cwd=resolve_command_workdir(root=root, workdir=workdir),
         timeout_seconds=timeout_seconds,
     )
+    result["shell"] = shell_name()
+    return result
+
+
+def run_powershell_command(*, root: str | Path, script: str, workdir: str | None = None, timeout_seconds: int = 60) -> dict[str, Any]:
+    if current_platform() != "windows":
+        return {"status": "error", "error": "powershell_windows_only", "shell": shell_name()}
+    return run_shell_command(root=root, script=script, workdir=workdir, timeout_seconds=timeout_seconds)
 
 
 def run_pytest_command(*, root: str | Path, test_path: str | None = None, timeout_seconds: int = 120, extra_args: list[str] | None = None) -> dict[str, Any]:

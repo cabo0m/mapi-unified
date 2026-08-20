@@ -367,6 +367,7 @@ This file is generated from the public workshop registry. Run `mapi-capabilities
 | `insert_after_marker` | Insert after marker. | `insert_after_marker` | `admin` | `R3` | read | no | no | no | no |
 | `replace_once` | Replace once. | `replace_once` | `admin` | `R3` | read | no | no | no | no |
 | `delete_path` | Delete path. | `delete_path` | `admin` | `R3` | write | no | yes | no | no |
+| `run_shell` | Run shell. | `run_shell` | `admin` | `R3` | write | no | yes | no | no |
 | `run_powershell` | Run powershell. | `run_powershell` | `admin` | `R3` | write | no | yes | no | no |
 | `run_pytest` | Run pytest. | `run_pytest` | `admin` | `R3` | write | no | yes | no | no |
 | `git_status` | Git status. | `git_status` | `admin` | `R3` | read | no | no | no | no |

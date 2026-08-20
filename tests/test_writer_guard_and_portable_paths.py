@@ -148,6 +148,9 @@ def test_read_only_mode_blocks_domain_mutation_but_allows_admin_recovery(
         domain = freshness.mutation_freshness_guard(
             area="memory", action="save", risk_class="R1", payload={}
         )
+        admin_shell = freshness.mutation_freshness_guard(
+            area="admin", action="run_shell", risk_class="R3", payload={}
+        )
         admin = freshness.mutation_freshness_guard(
             area="admin", action="run_powershell", risk_class="R3", payload={}
         )
@@ -159,6 +162,7 @@ def test_read_only_mode_blocks_domain_mutation_but_allows_admin_recovery(
         )
         assert domain["allowed"] is False
         assert domain["reason_codes"] == ["writer_read_only_mode"]
+        assert admin_shell == {"allowed": True, "required": False, "reason_codes": []}
         assert admin == {"allowed": True, "required": False, "reason_codes": []}
         assert write_sql["allowed"] is False
         assert write_sql["reason_codes"] == ["writer_read_only_mode"]

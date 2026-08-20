@@ -7,6 +7,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from mapi_platform.selector import current_platform
+from mapi_platform.shell import shell_command, shell_name
+
 from app import backfill_logic, db_migrations, timeline as _timeline
 from app.runtime.context import configure_runtime_context, get_runtime_context
 
@@ -1099,25 +1102,27 @@ def _run_consolidation_v1_impl(notes: str | None = None) -> dict[str, Any]:
 
 
 @_replace_mcp_tool
-def run_powershell(script: str, workdir: str | None = None, timeout_seconds: int = 60) -> dict[str, Any]:
+def run_shell(script: str, workdir: str | None = None, timeout_seconds: int = 60) -> dict[str, Any]:
     if not isinstance(script, str) or not script.strip():
-        return {"status": "error", "error": 'script musi być niepustym stringiem'}
-
+        return {"status": "error", "error": "script_must_be_non_empty"}
     timeout_seconds = int(timeout_seconds)
     if timeout_seconds < 1 or timeout_seconds > 300:
-        return {"status": "error", "error": 'timeout_seconds musi być w zakresie 1..300'}
-
+        return {"status": "error", "error": "timeout_seconds_out_of_range"}
     cwd = _resolve_shell_workdir(workdir)
-    command = [
-        "powershell.exe",
-        "-NoProfile",
-        "-NonInteractive",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-Command",
-        script,
-    ]
-    return _run_subprocess_command(command, cwd=cwd, timeout_seconds=timeout_seconds)
+    try:
+        command = shell_command(script)
+    except RuntimeError as exc:
+        return {"status": "error", "error": str(exc), "shell": shell_name()}
+    result = _run_subprocess_command(command, cwd=cwd, timeout_seconds=timeout_seconds)
+    result["shell"] = shell_name()
+    return result
+
+
+@_replace_mcp_tool
+def run_powershell(script: str, workdir: str | None = None, timeout_seconds: int = 60) -> dict[str, Any]:
+    if current_platform() != "windows":
+        return {"status": "error", "error": "powershell_windows_only", "shell": shell_name()}
+    return run_shell(script=script, workdir=workdir, timeout_seconds=timeout_seconds)
 
 
 @_replace_mcp_tool

@@ -86,9 +86,17 @@ WORKSHOP = Workshop(
             payload_schema={'path': 'str'},
         ),
         WorkshopAction(
+            action='run_shell',
+            tool_name='run_shell',
+            purpose='Run the platform-native administrative shell.',
+            min_profile='admin',
+            risk='high',
+            payload_schema={'script': 'str', 'workdir': 'str|null', 'timeout_seconds': 'int'},
+        ),
+        WorkshopAction(
             action='run_powershell',
             tool_name='run_powershell',
-            purpose='Uruchom PowerShell.',
+            purpose='Run PowerShell on Windows (compatibility alias).',
             min_profile='admin',
             risk='high',
             payload_schema={'script': 'str', 'workdir': 'str|null', 'timeout_seconds': 'int'},

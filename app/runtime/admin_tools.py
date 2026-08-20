@@ -101,6 +101,18 @@ def delete_path(path: str, recursive: bool = True) -> dict[str, Any]:
     return _base.delete_path(path=path, recursive=recursive)
 
 
+def run_shell(
+    script: str,
+    workdir: str | None = None,
+    timeout_seconds: int = 60,
+) -> dict[str, Any]:
+    return _runtime.run_shell(
+        script=script,
+        workdir=workdir,
+        timeout_seconds=timeout_seconds,
+    )
+
+
 def run_powershell(
     script: str,
     workdir: str | None = None,

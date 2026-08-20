@@ -107,6 +107,7 @@ from app.admin.operator_tools import (
     git_push_command,
     git_status_command,
     run_powershell_command,
+    run_shell_command,
     run_pytest_command,
 )
 from app.bootstrap.agent_core import (
@@ -7518,6 +7519,12 @@ def replace_once(
         dry_run=dry_run,
         backup=backup,
     )
+
+@mcp.tool
+def run_shell(script: str, workdir: str | None = None, timeout_seconds: int = 60) -> dict[str, Any]:
+    """Run an arbitrary admin shell script using the platform-native shell."""
+    return run_shell_command(root=runtime_root(), script=script, workdir=workdir, timeout_seconds=timeout_seconds)
+
 
 @mcp.tool
 def run_powershell(script: str, workdir: str | None = None, timeout_seconds: int = 60) -> dict[str, Any]:
