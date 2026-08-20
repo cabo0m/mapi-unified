@@ -281,6 +281,7 @@ Usage:
   mapi remote issue-service-token [--root PATH] [--label NAME] [--ttl-days N]
   mapi remote revoke <fingerprint> [--root PATH]
   mapi import-aurora --source-db PATH [--root PATH] [--apply --expected-preview-hash HASH]
+  mapi import-aurora-config --source-config PATH [--root PATH] [--apply --expected-preview-hash HASH]
   mapi capabilities
   mapi version
 """
@@ -304,6 +305,36 @@ def main() -> None:
         from mapi.maintenance import main as maintenance_main
 
         raise SystemExit(maintenance_main(argv))
+    if command == "import-aurora-config":
+        parser = argparse.ArgumentParser(prog="mapi import-aurora-config")
+        parser.add_argument("--source-config", required=True, type=Path)
+        parser.add_argument("--root", "--instance-root", dest="root", type=Path)
+        parser.add_argument("--apply", action="store_true")
+        parser.add_argument("--expected-preview-hash")
+        parser.add_argument("--replace-existing-capabilities", action="store_true")
+        parsed = parser.parse_args(argv)
+        root = (parsed.root or default_instance_root()).expanduser().resolve()
+        target_env = root / ".env"
+        from mapi.aurora_config_import import apply_aurora_config_import, preview_aurora_config_import
+
+        payload = (
+            apply_aurora_config_import(
+                source_config=parsed.source_config,
+                target_env=target_env,
+                expected_preview_hash=parsed.expected_preview_hash,
+                replace_existing_capabilities=parsed.replace_existing_capabilities,
+            )
+            if parsed.apply
+            else preview_aurora_config_import(
+                source_config=parsed.source_config,
+                target_env=target_env,
+                replace_existing_capabilities=parsed.replace_existing_capabilities,
+            )
+        )
+        print(json.dumps(payload, indent=2, ensure_ascii=False, default=str))
+        if payload.get("status") in {"blocked", "stale_preview"}:
+            raise SystemExit(2)
+        return
     if command == "import-aurora":
         parser = argparse.ArgumentParser(prog="mapi import-aurora")
         parser.add_argument("--source-db", required=True, type=Path)
