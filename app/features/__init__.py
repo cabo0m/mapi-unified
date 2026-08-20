@@ -1,1 +1,5 @@
-"""Feature flag helper modules for MAPI/MAPI."""
+from __future__ import annotations
+
+from mapi_core import features as _impl
+
+__path__ = _impl.__path__

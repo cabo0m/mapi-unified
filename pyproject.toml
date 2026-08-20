@@ -64,7 +64,7 @@ include = ["app*", "mapi*"]
 
 [tool.setuptools.package-data]
 "app.sandman.corpora" = ["*.json"]
-"app.memory.corpora" = ["*.json"]
+"mapi_core.memory.corpora" = ["*.json"]
 
 [tool.ruff]
 target-version = "py311"

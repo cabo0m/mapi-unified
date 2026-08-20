@@ -1,4 +1,4 @@
-from app.memory.retention import preview_memory_retention_policy_payload
+from mapi_core.memory.retention import preview_memory_retention_policy_payload
 from tests.memory_v3_retention_test_helpers import NOW, canonical_hash, insert_memory, make_conn
 
 

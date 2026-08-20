@@ -11,7 +11,7 @@ from app.conflict_logic import (
     normalize_text_for_conflict,
 )
 from app.memory_store import require_memory_row, row_to_dict
-from app.schemas import SANDMAN_PROTECTED_LAYERS, SANDMAN_PROTECTED_STATES
+from mapi_core.schemas import SANDMAN_PROTECTED_LAYERS, SANDMAN_PROTECTED_STATES
 
 
 def _build_scope_filter(workspace_id: int | None, project_key: str | None) -> tuple[str, list]:

@@ -6,10 +6,10 @@ import sqlite3
 from pathlib import Path
 
 from app import db_migrations
-from app.memory.retention import preview_memory_retention_policy_payload
-from app.memory.retention_apply import apply_memory_retention_review_payload
-from app.memory.retention_review import decide_retention_review_item, save_retention_review_item
-from app.memory.sla import compute_sla_days
+from mapi_core.memory.retention import preview_memory_retention_policy_payload
+from mapi_core.memory.retention_apply import apply_memory_retention_review_payload
+from mapi_core.memory.retention_review import decide_retention_review_item, save_retention_review_item
+from mapi_core.memory.sla import compute_sla_days
 
 
 NOW = "2026-07-16T08:00:00+02:00"

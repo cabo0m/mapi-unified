@@ -1,6 +1,6 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
-from app.memory.agent_gravity import build_agent_gravity_preview, build_gravity_context_block, build_gravity_shadow_comparison, gravity_policy
+from mapi_core.memory.agent_gravity import build_agent_gravity_preview, build_gravity_context_block, build_gravity_shadow_comparison, gravity_policy
 
 
 def _candidate(memory_id, *, project="p", summary="release checklist", tags="", truth_kind="fact", state="active", rules=None, source_kinds=None, importance=0.8):

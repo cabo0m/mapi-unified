@@ -20,14 +20,14 @@ from zoneinfo import ZoneInfo
 
 from app import db_migrations
 from app.sandman import router, shadow
-from app.sandman.contracts import (
+from mapi_core.sandman.contracts import (
     EXTERNAL_DATA_POLICY,
     PROVIDER_REQUEST_SCHEMA_VERSION,
     PROVIDER_RESPONSE_SCHEMA_VERSION,
     PROVIDER_VALIDATION_SCHEMA_VERSION,
     REDACTION_POLICY_VERSION,
 )
-from app.sandman.providers.gemini import (
+from mapi_core.sandman.providers.gemini import (
     GeminiConfig,
     GeminiShadowProvider,
     GoogleGenAIInteractionsTransport,

@@ -7,8 +7,8 @@ from typing import Any
 
 import mcp_surface
 
-from app.memory import provenance_context
-from app.memory.provenance_context import resolve_write_provenance
+from mapi_core.memory import provenance_context
+from mapi_core.memory.provenance_context import resolve_write_provenance
 from app.runtime.backpressure import (
     BACKPRESSURE_SCHEMA,
     BackpressureState,

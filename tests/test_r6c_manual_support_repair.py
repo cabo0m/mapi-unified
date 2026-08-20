@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-from app.memory.r6c_manual_support_repair import apply, build_preview, build_rollback_preview, rollback
+from mapi_core.memory.r6c_manual_support_repair import apply, build_preview, build_rollback_preview, rollback
 
 
 def _db(path: Path | str = ":memory:") -> sqlite3.Connection:

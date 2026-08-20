@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import sqlite3
 
-from app.memory.retrieval_baseline import collect_embedding_coverage, evaluate_golden_cases, fingerprint
+from mapi_core.memory.retrieval_baseline import collect_embedding_coverage, evaluate_golden_cases, fingerprint
 
 
 def _db() -> sqlite3.Connection:

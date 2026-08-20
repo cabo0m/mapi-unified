@@ -5,7 +5,7 @@ import hashlib
 import sqlite3
 
 from app import db_migrations
-from app.sandman.contracts import SAFETY_BLOCK, build_provider_request
+from mapi_core.sandman.contracts import SAFETY_BLOCK, build_provider_request
 from app.sandman.redaction import build_redacted_candidates
 
 

@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from app.memory import lifecycle_snapshots
+from mapi_core.memory import lifecycle_snapshots
 
 
 def _create_memory(server: Any, **overrides: Any) -> int:

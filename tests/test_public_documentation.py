@@ -342,6 +342,10 @@ def test_clean_release_git_metadata_passes_public_policy() -> None:
     failures: list[dict[str, str]] = []
     result = public_audit._scan_git_metadata(failures)
     assert result["commit_count"] >= 1
-    assert result["repository_state"] == "published"
-    assert result["canonical_origin"] == public_audit.CANONICAL_HTTPS_ORIGIN
+    if result["remotes"]:
+        assert result["repository_state"] == "published"
+        assert result["canonical_origin"] == public_audit.CANONICAL_HTTPS_ORIGIN
+    else:
+        assert result["repository_state"] == "release_candidate"
+        assert result["canonical_origin"] is None
     assert failures == []

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.memory import self_healing
+from mapi_core.memory import self_healing
 
 
 def _direct(server: Any, *, content: str, project_key: str) -> int:

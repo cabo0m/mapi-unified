@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-from app.memory.r6c_truth_archive import (
+from mapi_core.memory.r6c_truth_archive import (
     ARCHIVE_LINK_IDS,
     REPAIR_KEY,
     apply,

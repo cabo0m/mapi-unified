@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from app import db_migrations
-from app.memory import hygiene
+from mapi_core.memory import hygiene
 
 
 def _conn() -> sqlite3.Connection:
@@ -378,7 +378,7 @@ def test_apply_is_metadata_only_stale_guarded_and_exactly_rollbackable(tmp_path:
 
 
 def test_quality_scope_counter_ignores_legal_global_identity() -> None:
-    from app.memory.quality import count_project_scope_mismatches, project_scope_mismatch_rows
+    from mapi_core.memory.quality import count_project_scope_mismatches, project_scope_mismatch_rows
 
     conn = _conn()
     _insert_memory(

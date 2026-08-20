@@ -5,7 +5,7 @@ from typing import Any
 
 import pytest
 
-from app.features import flag_helpers
+from mapi_core.features import flag_helpers
 
 
 def _normalize_required_text(value: Any, field: str) -> str:

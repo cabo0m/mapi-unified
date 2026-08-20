@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from app.sandman.providers.deterministic import DeterministicProvider
-from app.sandman.validator import validate_provider_response
+from mapi_core.sandman.validator import validate_provider_response
 from tests.sandman_v3_helpers import candidate, request
 
 

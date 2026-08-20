@@ -6,7 +6,7 @@ import sqlite3
 
 import mcp_surface
 
-from app.memory.pagination import (
+from mapi_core.memory.pagination import (
     COMPACT_FIELDS,
     DEFAULT_FIELDS,
     MEMORY_LIST_CURSOR_SCHEMA,

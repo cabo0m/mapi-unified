@@ -3,13 +3,13 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Callable, Mapping
 
-from app.sandman.contracts import (
+from mapi_core.sandman.contracts import (
     PROVIDER_REQUEST_SCHEMA_VERSION,
     PROVIDER_RESPONSE_SCHEMA_VERSION,
     PROVIDER_VALIDATION_SCHEMA_VERSION,
     canonical_fingerprint,
 )
-from app.sandman.providers.gemini import (
+from mapi_core.sandman.providers.gemini import (
     PROVIDER_CONFIG_VERSION,
     STATELESS_AUDIT,
     GeminiConfig,

@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlite3
 from pathlib import Path
 
-from app.memory.r6b_link_repair import (
+from mapi_core.memory.r6b_link_repair import (
     ALL_TARGET_LINK_IDS,
     INVALID_LINK_SPECS,
     REDUNDANT_LINK_IDS,

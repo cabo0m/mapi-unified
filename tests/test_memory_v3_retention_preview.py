@@ -3,7 +3,7 @@ from __future__ import annotations
 import sqlite3
 
 from app import db_migrations
-from app.memory.retention import preview_memory_retention_policy_payload, preview_project_memory_retention_payload
+from mapi_core.memory.retention import preview_memory_retention_policy_payload, preview_project_memory_retention_payload
 
 
 def _setup() -> sqlite3.Connection:

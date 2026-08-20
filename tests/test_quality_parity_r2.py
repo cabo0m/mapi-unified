@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from app.memory.context_engine import build_agent_context_payload
-from app.memory.hybrid_retrieval import fuse_hybrid_results
-from app.memory.steward import capture_phase_payload
+from mapi_core.memory.context_engine import build_agent_context_payload
+from mapi_core.memory.hybrid_retrieval import fuse_hybrid_results
+from mapi_core.memory.steward import capture_phase_payload
 
 
 def _memory(memory_id: int, content: str, project: str = "project-a", created_at: str = "2026-08-18T10:00:00Z") -> dict:
@@ -137,10 +137,10 @@ def test_memory_steward_returns_explicit_review_route_with_evidence() -> None:
 def test_new_public_quality_modules_do_not_embed_private_identity() -> None:
     root = Path(__file__).resolve().parents[1]
     paths = [
-        root / "app" / "bootstrap" / "agent_core.py",
-        root / "app" / "memory" / "context_engine.py",
-        root / "app" / "memory" / "hybrid_retrieval.py",
-        root / "app" / "memory" / "steward.py",
+        root / "mapi_core" / "bootstrap" / "agent_core.py",
+        root / "mapi_core" / "memory" / "context_engine.py",
+        root / "mapi_core" / "memory" / "hybrid_retrieval.py",
+        root / "mapi_core" / "memory" / "steward.py",
     ]
     forbidden = ("jagoda", "micha", "morenatech")
     for path in paths:

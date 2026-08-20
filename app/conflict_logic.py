@@ -4,7 +4,7 @@ import re
 import sqlite3
 from typing import Any, Callable
 
-from app.memory.lifecycle_contracts import (
+from mapi_core.memory.lifecycle_contracts import (
     derive_canonical_memory_state,
     is_transition_allowed,
     project_memory_v2_status,

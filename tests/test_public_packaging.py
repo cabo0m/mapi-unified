@@ -43,4 +43,4 @@ def test_corpus_json_is_declared_as_package_data() -> None:
     metadata = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
     package_data = metadata["tool"]["setuptools"]["package-data"]
     assert package_data["app.sandman.corpora"] == ["*.json"]
-    assert package_data["app.memory.corpora"] == ["*.json"]
+    assert package_data["mapi_core.memory.corpora"] == ["*.json"]

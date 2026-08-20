@@ -251,8 +251,8 @@ def run_maintenance(
 
     with _exclusive_lock(root_path):
         import server_core
-        from app.memory import hygiene as memory_hygiene
-        from app.memory import self_healing
+        from mapi_core.memory import hygiene as memory_hygiene
+        from mapi_core.memory import self_healing
 
         structural_before = _structural_diagnostics(server_core)
 

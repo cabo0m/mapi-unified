@@ -1,18 +1,18 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import json
 from types import SimpleNamespace
 
 import mcp_surface
 
-from app.memory.agent_self_narrative import (
+from mapi_core.memory.agent_self_narrative import (
     AGENT_SELF_NARRATIVE_SCHEMA,
     GeminiNarrativePlanner,
     NarrativeGeminiConfig,
     SECTION_KEYS,
     build_agent_self_narrative_payload,
 )
-from app.sandman.providers.gemini import FakeGeminiInteractionsTransport, PRIMARY_MODEL
+from mapi_core.sandman.providers.gemini import FakeGeminiInteractionsTransport, PRIMARY_MODEL
 
 
 def _memory(memory_factory, **overrides):

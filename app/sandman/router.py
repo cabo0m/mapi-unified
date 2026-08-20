@@ -5,7 +5,7 @@ import os
 import uuid
 from typing import Any, Callable, Mapping
 
-from app.sandman.contracts import (
+from mapi_core.sandman.contracts import (
     MAX_CANDIDATES,
     MAX_EVIDENCE_IDS_PER_PROPOSAL,
     MAX_PROPOSALS,
@@ -21,7 +21,7 @@ from app.sandman.contracts import (
 )
 from app.sandman.providers.deterministic import DeterministicProvider
 from app.sandman.redaction import EXTERNAL_DATA_POLICY, REDACTION_POLICY_VERSION, build_redacted_candidates
-from app.sandman.validator import validate_provider_response
+from mapi_core.sandman.validator import validate_provider_response
 
 
 PROVIDER_STATUS_SCHEMA_VERSION = "sandman_provider_status.v1"

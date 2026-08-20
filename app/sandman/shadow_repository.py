@@ -5,7 +5,7 @@ import sqlite3
 from datetime import datetime, timezone
 from typing import Any, Mapping
 
-from app.sandman.contracts import canonical_json
+from mapi_core.sandman.contracts import canonical_json
 
 
 SAFE_COLUMNS = (

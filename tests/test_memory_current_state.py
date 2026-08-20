@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from app.memory.current_state import resolve_current_memory_state
+from mapi_core.memory.current_state import resolve_current_memory_state
 
 
 def _direct(server: Any, *, content: str, project_key: str, **extra: Any) -> int:

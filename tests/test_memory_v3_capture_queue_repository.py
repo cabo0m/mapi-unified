@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 
 from app import db_migrations
-from app.memory.capture_queue import (
+from mapi_core.memory.capture_queue import (
     create_capture_review_item,
     get_capture_review_item,
     list_capture_review_items,
@@ -14,7 +14,7 @@ from app.memory.capture_queue import (
     update_capture_reconciliation_preview,
     expire_capture_item,
 )
-from app.schemas import normalize_optional_text, normalize_required_text
+from mapi_core.schemas import normalize_optional_text, normalize_required_text
 
 
 def _make_conn() -> sqlite3.Connection:

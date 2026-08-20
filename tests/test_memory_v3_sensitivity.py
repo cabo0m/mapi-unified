@@ -1,4 +1,4 @@
-from app.memory.sensitivity import classify_memory_sensitivity
+from mapi_core.memory.sensitivity import classify_memory_sensitivity
 
 
 def test_security_policy_description_is_not_a_secret() -> None:

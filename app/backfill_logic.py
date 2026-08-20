@@ -5,7 +5,7 @@ import sqlite3
 from collections import Counter, defaultdict
 from typing import Any
 
-from app.schemas import derive_state_code
+from mapi_core.schemas import derive_state_code
 
 PROJECT_TYPE_CODES = {
     "project",

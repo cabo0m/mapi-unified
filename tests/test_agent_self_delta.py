@@ -1,12 +1,12 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import copy
 import json
 
 import mcp_surface
 
-from app.memory.agent_self_delta import AGENT_SELF_DELTA_SCHEMA, compare_agent_self_snapshots
-from app.memory.agent_self_model import calculate_agent_self_snapshot_fingerprint
+from mapi_core.memory.agent_self_delta import AGENT_SELF_DELTA_SCHEMA, compare_agent_self_snapshots
+from mapi_core.memory.agent_self_model import calculate_agent_self_snapshot_fingerprint
 
 
 def _self(memory_factory, **overrides):

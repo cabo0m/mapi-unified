@@ -5,7 +5,7 @@ import sqlite3
 from collections import Counter
 from typing import Any
 
-from app.schemas import DEFAULT_SCOPE_CODE
+from mapi_core.schemas import DEFAULT_SCOPE_CODE
 
 
 PROJECT_TYPES = {

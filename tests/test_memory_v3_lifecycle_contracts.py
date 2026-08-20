@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from app.memory.lifecycle_contracts import (
+from mapi_core.memory.lifecycle_contracts import (
     ALLOWED_MEMORY_TRANSITIONS,
     CANONICAL_MEMORY_STATES,
     MEMORY_V3_RELATION_KINDS,

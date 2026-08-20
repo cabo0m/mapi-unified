@@ -4,7 +4,7 @@ from typing import Any
 
 import mcp_surface
 
-from app.memory.relation_contracts import CANONICAL_MEMORY_RELATIONS
+from mapi_core.memory.relation_contracts import CANONICAL_MEMORY_RELATIONS
 
 
 def _counts(server: Any) -> dict[str, int]:

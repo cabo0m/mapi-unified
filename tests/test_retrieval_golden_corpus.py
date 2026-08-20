@@ -1,8 +1,8 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from pathlib import Path
 
-from app.memory.retrieval_baseline import (
+from mapi_core.memory.retrieval_baseline import (
     RETRIEVAL_GOLDEN_CORPUS_SCHEMA,
     load_retrieval_golden_corpus,
     materialize_golden_cases,

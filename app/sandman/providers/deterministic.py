@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from app.sandman.contracts import PROVIDER_RESPONSE_SCHEMA_VERSION, validate_provider_request
+from mapi_core.sandman.contracts import PROVIDER_RESPONSE_SCHEMA_VERSION, validate_provider_request
 from app.sandman.providers.base import PROPOSAL_ONLY_CAPABILITIES
 
 

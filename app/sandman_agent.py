@@ -5,9 +5,9 @@ import sqlite3
 from typing import Any
 
 from app import lm_studio_client
-from app.memory.capture_queue import create_capture_review_item
-from app.memory.sensitivity import RESTRICTED_CAPTURE_CLASSES, classify_memory_sensitivity
-from app.memory.write_routing import normalize_memory_content, write_input_fingerprint
+from mapi_core.memory.capture_queue import create_capture_review_item
+from mapi_core.memory.sensitivity import RESTRICTED_CAPTURE_CLASSES, classify_memory_sensitivity
+from mapi_core.memory.write_routing import normalize_memory_content, write_input_fingerprint
 from app.memory_store import utc_now_iso
 
 LM_STUDIO_MODEL = lm_studio_client.LM_STUDIO_MODEL

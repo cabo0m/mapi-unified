@@ -11,7 +11,7 @@ from importlib.resources import files
 from typing import Any, Callable, Mapping
 
 from app import db_migrations
-from app.sandman.contracts import (
+from mapi_core.sandman.contracts import (
     ContractError,
     PROPOSAL_ACTIONS,
     canonical_fingerprint,
@@ -19,13 +19,13 @@ from app.sandman.contracts import (
     strict_json_loads,
 )
 from app.sandman.providers.deterministic import DeterministicProvider
-from app.sandman.providers.gemini import (
+from mapi_core.sandman.providers.gemini import (
     MODEL_ALLOWLIST,
     PRIMARY_MODEL,
     PROVIDER_CONFIG_VERSION,
 )
 from app.sandman.router import preview_provider_request_payload
-from app.sandman.validator import validate_provider_response
+from mapi_core.sandman.validator import validate_provider_response
 
 
 CORPUS_SCHEMA_VERSION = "sandman_semantic_evaluation_corpus.v1"

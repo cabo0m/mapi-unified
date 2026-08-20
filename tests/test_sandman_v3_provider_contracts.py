@@ -4,7 +4,7 @@ import copy
 
 import pytest
 
-from app.sandman.contracts import ContractError, SAFETY_BLOCK, build_provider_request, parse_provider_response, validate_provider_request
+from mapi_core.sandman.contracts import ContractError, SAFETY_BLOCK, build_provider_request, parse_provider_response, validate_provider_request
 from tests.sandman_v3_helpers import candidate, request
 
 

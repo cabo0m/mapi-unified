@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Any, Callable, Mapping
 
 from app.sandman import shadow_repository
-from app.sandman.contracts import (
+from mapi_core.sandman.contracts import (
     ContractError,
     PROVIDER_REQUEST_SCHEMA_VERSION,
     PROVIDER_RESPONSE_SCHEMA_VERSION,
@@ -24,7 +24,7 @@ from app.sandman.evaluation import (
     evaluate_semantic_provider_bundle,
 )
 from app.sandman.providers.deterministic import DeterministicProvider
-from app.sandman.providers.gemini import (
+from mapi_core.sandman.providers.gemini import (
     PRIMARY_MODEL,
     PROVIDER_CONFIG_VERSION,
     GeminiConfig,
@@ -36,7 +36,7 @@ from app.sandman.redaction import (
     REDACTION_POLICY_VERSION,
     residual_sensitive_reason_codes,
 )
-from app.sandman.validator import validate_provider_response
+from mapi_core.sandman.validator import validate_provider_response
 
 
 MODEL_QUEUE_ROUTING_FLAG_KEY = "sandman_model_queue_routing_enabled"

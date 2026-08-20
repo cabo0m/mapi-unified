@@ -4,7 +4,7 @@ import sqlite3
 from typing import Callable
 
 from app import timeline
-from app.memory.project_keys import ensure_project_key_alias_schema, seed_default_project_key_aliases
+from mapi_core.memory.project_keys import ensure_project_key_alias_schema, seed_default_project_key_aliases
 
 MigrationFn = Callable[[sqlite3.Connection], None]
 
@@ -2070,13 +2070,13 @@ def _migration_0034_recall_importance_decoupling(conn: sqlite3.Connection) -> No
 
 
 def _migration_0035_polaris_onboarding(conn: sqlite3.Connection) -> None:
-    from app.runtime.onboarding import ensure_onboarding_schema
+    from mapi_core.onboarding import ensure_onboarding_schema
 
     ensure_onboarding_schema(conn)
 
 
 def _migration_0036_memory_self_healing(conn: sqlite3.Connection) -> None:
-    from app.memory.self_healing import ensure_self_healing_schema
+    from mapi_core.memory.self_healing import ensure_self_healing_schema
 
     ensure_self_healing_schema(conn)
 
