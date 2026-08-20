@@ -3,6 +3,7 @@ from __future__ import annotations
 """Runtime identity, readiness and stale-runtime mutation guards."""
 
 import hashlib
+import importlib.metadata
 import json
 import os
 import sqlite3
@@ -25,6 +26,7 @@ REGISTRY_VERSION = "mapi_workshop_registry.v9"
 FRESHNESS_CONTRACT_VERSION = "mapi_runtime_freshness.v1"
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8015
+ARTIFACT_DISTRIBUTION_NAME = "mapi-agent-memory"
 
 _LOCK = RLock()
 _RUNTIME_METADATA: dict[str, Any] | None = None
@@ -156,6 +158,60 @@ def repository_state(root: Path | None = None) -> dict[str, Any]:
     }
 
 
+def artifact_state() -> dict[str, Any]:
+    """Return immutable installed-distribution provenance when MAPI is running from a wheel.
+
+    The RECORD fingerprint changes on a package upgrade/reinstall, so a running process can
+    detect that its installed artifact changed underneath it and require a restart.
+    """
+    try:
+        distribution = importlib.metadata.distribution(ARTIFACT_DISTRIBUTION_NAME)
+    except importlib.metadata.PackageNotFoundError:
+        return {
+            "available": False,
+            "distribution": ARTIFACT_DISTRIBUTION_NAME,
+            "version": None,
+            "fingerprint": None,
+            "reason": "distribution_not_installed",
+        }
+    version = str(distribution.version or "").strip() or None
+    record = distribution.read_text("RECORD")
+    if not record:
+        return {
+            "available": False,
+            "distribution": ARTIFACT_DISTRIBUTION_NAME,
+            "version": version,
+            "fingerprint": None,
+            "reason": "distribution_record_missing",
+        }
+    record_sha256 = hashlib.sha256(record.encode("utf-8")).hexdigest()
+    fingerprint = _sha256_json(
+        {
+            "distribution": ARTIFACT_DISTRIBUTION_NAME,
+            "version": version,
+            "record_sha256": record_sha256,
+        }
+    )
+    return {
+        "available": True,
+        "distribution": ARTIFACT_DISTRIBUTION_NAME,
+        "version": version,
+        "record_sha256": record_sha256,
+        "fingerprint": fingerprint,
+        "reason": None,
+    }
+
+
+def runtime_provenance_state() -> dict[str, Any]:
+    repository = repository_state()
+    if repository.get("git_available"):
+        return {"mode": "source", "repository": repository, "artifact": None}
+    artifact = artifact_state()
+    if artifact.get("available"):
+        return {"mode": "artifact", "repository": repository, "artifact": artifact}
+    return {"mode": "unavailable", "repository": repository, "artifact": artifact}
+
+
 def schema_tail(db_path: Path | None = None) -> str | None:
     path = Path(db_path or runtime_db_path()).resolve()
     if not path.exists():
@@ -282,7 +338,10 @@ def initialize_runtime_metadata(*, force: bool = False) -> dict[str, Any]:
         if _RUNTIME_METADATA is not None and not force:
             return dict(_RUNTIME_METADATA)
 
-        repo = repository_state()
+        provenance = runtime_provenance_state()
+        repo = provenance["repository"]
+        artifact = provenance.get("artifact") or {}
+        provenance_mode = str(provenance.get("mode") or "unavailable")
         registry = registry_contract()
         config = runtime_config_contract()
         metadata = {
@@ -292,9 +351,13 @@ def initialize_runtime_metadata(*, force: bool = False) -> dict[str, Any]:
             "pid": os.getpid(),
             "python_executable": sys.executable,
             "instance_token": os.environ.get("MAPI_RUNTIME_INSTANCE_TOKEN") or uuid.uuid4().hex,
-            "expected_commit": os.environ.get("MAPI_EXPECTED_COMMIT") or None,
-            "commit_sha": repo.get("head"),
-            "dirty_at_start": repo.get("dirty"),
+            "provenance_mode": provenance_mode,
+            "expected_commit": (os.environ.get("MAPI_EXPECTED_COMMIT") or None) if provenance_mode == "source" else None,
+            "commit_sha": repo.get("head") if provenance_mode == "source" else None,
+            "dirty_at_start": repo.get("dirty") if provenance_mode == "source" else None,
+            "artifact_distribution": artifact.get("distribution") if provenance_mode == "artifact" else None,
+            "artifact_version": artifact.get("version") if provenance_mode == "artifact" else None,
+            "artifact_fingerprint": artifact.get("fingerprint") if provenance_mode == "artifact" else None,
             "registry_version": registry["version"],
             "registry_fingerprint": registry["fingerprint"],
             "registry_action_count": registry["action_count"],
@@ -321,6 +384,10 @@ def runtime_metadata() -> dict[str, Any]:
 
 def _launcher_contract(metadata: dict[str, Any]) -> tuple[dict[str, Any] | None, list[str]]:
     reasons: list[str] = []
+    if metadata.get("provenance_mode") == "artifact":
+        # An installed wheel is launched directly by its console entry point. Its immutable
+        # distribution fingerprint replaces the source-checkout launcher/commit contract.
+        return None, reasons
     record = _read_json(launcher_record_path())
     if not freshness_enforcement_enabled():
         return record, reasons
@@ -353,23 +420,37 @@ def get_runtime_readiness(include_debug: bool = False) -> dict[str, Any]:
     expected_commit = metadata.get("expected_commit")
     runtime_commit = metadata.get("commit_sha")
     repo_head = repo.get("head")
+    provenance_mode = str(metadata.get("provenance_mode") or "unavailable")
+    current_artifact = artifact_state() if provenance_mode == "artifact" else None
 
-    if not repo.get("git_available"):
-        reasons.append("repository_state_unavailable")
-    if runtime_commit is None:
-        reasons.append("runtime_commit_missing")
-    if repo_head is None:
-        reasons.append("repository_head_missing")
-    if runtime_commit and repo_head and runtime_commit != repo_head:
-        reasons.append("runtime_commit_mismatch")
-    if expected_commit and runtime_commit != expected_commit:
-        reasons.append("runtime_expected_commit_mismatch")
-    if freshness_enforcement_enabled() and not expected_commit:
-        reasons.append("expected_commit_missing")
-    if metadata.get("dirty_at_start") is True:
-        reasons.append("runtime_started_dirty")
-    if repo.get("dirty") is True:
-        reasons.append("repository_dirty")
+    if provenance_mode == "source":
+        if not repo.get("git_available"):
+            reasons.append("repository_state_unavailable")
+        if runtime_commit is None:
+            reasons.append("runtime_commit_missing")
+        if repo_head is None:
+            reasons.append("repository_head_missing")
+        if runtime_commit and repo_head and runtime_commit != repo_head:
+            reasons.append("runtime_commit_mismatch")
+        if expected_commit and runtime_commit != expected_commit:
+            reasons.append("runtime_expected_commit_mismatch")
+        if freshness_enforcement_enabled() and not expected_commit:
+            reasons.append("expected_commit_missing")
+        if metadata.get("dirty_at_start") is True:
+            reasons.append("runtime_started_dirty")
+        if repo.get("dirty") is True:
+            reasons.append("repository_dirty")
+    elif provenance_mode == "artifact":
+        runtime_artifact = metadata.get("artifact_fingerprint")
+        if not current_artifact or not current_artifact.get("available"):
+            reasons.append("artifact_state_unavailable")
+        if not runtime_artifact:
+            reasons.append("runtime_artifact_fingerprint_missing")
+        current_fingerprint = (current_artifact or {}).get("fingerprint")
+        if runtime_artifact and current_fingerprint and runtime_artifact != current_fingerprint:
+            reasons.append("artifact_fingerprint_mismatch")
+    elif freshness_enforcement_enabled():
+        reasons.append("runtime_provenance_unavailable")
     if metadata.get("registry_fingerprint") != registry.get("fingerprint"):
         reasons.append("registry_fingerprint_mismatch")
     if metadata.get("schema_tail") != current_schema_tail:
@@ -387,8 +468,12 @@ def get_runtime_readiness(include_debug: bool = False) -> dict[str, Any]:
         "mutations_allowed": ready,
         "reason_codes": unique_reasons,
         "runtime": {
+            "provenance_mode": provenance_mode,
             "commit_sha": runtime_commit,
             "dirty_at_start": metadata.get("dirty_at_start"),
+            "artifact_distribution": metadata.get("artifact_distribution"),
+            "artifact_version": metadata.get("artifact_version"),
+            "artifact_fingerprint": metadata.get("artifact_fingerprint"),
             "started_at": metadata.get("started_at"),
             "pid": metadata.get("pid"),
             "instance_token": metadata.get("instance_token"),
@@ -399,6 +484,12 @@ def get_runtime_readiness(include_debug: bool = False) -> dict[str, Any]:
             "config_fingerprint": metadata.get("config_fingerprint"),
             "runtime_mode": metadata.get("runtime_mode"),
             "owner_key": metadata.get("owner_key"),
+        },
+        "artifact": {
+            "available": bool((current_artifact or {}).get("available")) if provenance_mode == "artifact" else False,
+            "distribution": (current_artifact or {}).get("distribution") if provenance_mode == "artifact" else None,
+            "version": (current_artifact or {}).get("version") if provenance_mode == "artifact" else None,
+            "fingerprint": (current_artifact or {}).get("fingerprint") if provenance_mode == "artifact" else None,
         },
         "repository": {
             "head": repo_head,
@@ -418,7 +509,7 @@ def get_runtime_readiness(include_debug: bool = False) -> dict[str, Any]:
                     "action": "move_wip_to_dedicated_worktree",
                     "message": "Move tracked WIP to a dedicated Git worktree; do not disable freshness.",
                 }
-                if repo.get("dirty")
+                if provenance_mode == "source" and repo.get("dirty")
                 else None
             ),
         },

@@ -342,6 +342,7 @@
     "tests/test_agent_self_delta.py",
     "tests/test_agent_self_model.py",
     "tests/test_agent_self_narrative.py",
+    "tests/test_artifact_freshness.py",
     "tests/test_common_capability_workshops.py",
     "tests/test_common_host_capabilities.py",
     "tests/test_conflict_explainer.py",

@@ -91,3 +91,5 @@ try {
     }
     Remove-Item -LiteralPath $Base -Recurse -Force -ErrorAction SilentlyContinue
 }
+
+exit 0
