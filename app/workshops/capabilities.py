@@ -49,6 +49,10 @@ def build_mapi_capabilities_payload(*, runtime_readiness: Mapping[str, Any]) -> 
             "instance_first_run_bootstrap": True,
             "guided_user_onboarding": True,
             "user_chosen_assistant_name": True,
+            "common_project_files": True,
+            "common_project_git": True,
+            "common_fixed_command_recipes": True,
+            "platform_adapter_selection": True,
         },
         "contracts": {
             "memory.find.sort_by": {

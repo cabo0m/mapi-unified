@@ -11,6 +11,9 @@ from app.workshops import research_ingest
 from app.workshops import semantic
 from app.workshops import gemma
 from app.workshops import memory_linking
+from app.workshops import files
+from app.workshops import git
+from app.workshops import commands
 from app.workshops import admin
 from app.workshops.access_policy import apply_workshop_access_policy
 from app.workshops.contracts import Workshop
@@ -27,6 +30,9 @@ WORKSHOP_PACKAGES = (
     semantic,
     gemma,
     memory_linking,
+    files,
+    git,
+    commands,
     admin,
 )
 

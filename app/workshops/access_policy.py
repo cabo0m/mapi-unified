@@ -50,6 +50,9 @@ PUBLIC_WORKSHOP_PURPOSES = {
     "sandman": "Run deterministic and proposal-only memory maintenance.",
     "memory_linking": "Preview and run deterministic relationship discovery.",
     "gemma": "Use optional local-model worker capabilities.",
+    "files": "Use project-bound file reads and guarded writes.",
+    "git": "Inspect project Git state and use guarded stage/commit operations.",
+    "commands": "Run operator-approved fixed command recipes.",
     "admin": "Perform dangerous local database, file, and process operations.",
 }
 
@@ -99,6 +102,13 @@ MAINTENANCE_TOOLS = frozenset(
         "run_sandman_v1",
         "run_sandman_ai",
         "confirm_memory_self_healing_resolution",
+        "apply_project_file_write",
+        "rollback_project_file_write",
+        "apply_project_git_stage",
+        "rollback_project_git_stage",
+        "apply_project_git_commit",
+        "rollback_project_git_commit",
+        "run_project_command_recipe",
     }
 )
 
@@ -124,6 +134,13 @@ AGENT_TOOLS = frozenset({"save_memory"})
 
 OPERATOR_WRITE_TOOLS = frozenset(
     {
+        "preview_project_file_write",
+        "preview_project_file_rollback",
+        "preview_project_git_stage",
+        "preview_project_git_stage_rollback",
+        "preview_project_git_commit",
+        "preview_project_git_commit_rollback",
+        "preview_project_command_recipe",
         "recall_memory",
         "archive_conversation",
         "propose_memory",

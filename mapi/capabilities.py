@@ -46,6 +46,9 @@ WORKSHOP_PURPOSES = {
     "sandman": "Run deterministic and proposal-only memory maintenance.",
     "memory_linking": "Preview and run deterministic relationship discovery.",
     "gemma": "Use optional local-model worker capabilities.",
+    "files": "Use project-bound file reads and guarded writes.",
+    "git": "Inspect project Git state and use guarded stage/commit operations.",
+    "commands": "Run operator-approved fixed command recipes.",
     "admin": "Perform dangerous local database, file and process operations.",
 }
 

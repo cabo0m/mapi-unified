@@ -57,7 +57,7 @@ def test_fresh_local_init_creates_private_runtime_state_and_self_model(tmp_path:
     root = tmp_path / "instance"
     result = initialize_instance(_options(root))
     assert result["status"] == "ready_to_start"
-    assert result["migration_tail"] == "0036_memory_self_healing"
+    assert result["migration_tail"] == "0040_common_command_runs"
     assert result["doctor_status"] in {"READY", "ATTENTION"}
     assert result["safety"] == {
         "existing_state_overwritten": False,
@@ -88,7 +88,7 @@ def test_resume_is_idempotent_and_does_not_duplicate_self_evidence(tmp_path: Pat
     second = initialize_instance(_options(root, resume=True))
     assert second["status"] == "ready_to_start"
     assert second["migrations_applied_now"] == []
-    assert second["migration_tail"] == "0036_memory_self_healing"
+    assert second["migration_tail"] == "0040_common_command_runs"
     assert second["self_memory_ids"] == first["self_memory_ids"]
     assert len(_memory_rows(root / "data" / "mapi.db")) == 2
 

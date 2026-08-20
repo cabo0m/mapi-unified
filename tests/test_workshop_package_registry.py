@@ -24,6 +24,9 @@ EXPECTED_AREAS = (
     "semantic",
     "gemma",
     "memory_linking",
+    "files",
+    "git",
+    "commands",
     "admin",
 )
 
@@ -88,6 +91,7 @@ def test_server_module_rebinds_owned_runtime_handlers() -> None:
         "app.runtime.server_runtime",
         "app.runtime.timeline_tools",
         "app.runtime.admin_tools",
+        "app.runtime.capability_tools",
         "app.runtime.freshness",
         "app.runtime.private_mode",
     }

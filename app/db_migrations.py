@@ -2081,6 +2081,30 @@ def _migration_0036_memory_self_healing(conn: sqlite3.Connection) -> None:
     ensure_self_healing_schema(conn)
 
 
+def _migration_0037_common_file_operations(conn: sqlite3.Connection) -> None:
+    from mapi_capabilities.schema import ensure_file_operation_schema
+
+    ensure_file_operation_schema(conn)
+
+
+def _migration_0038_common_git_commit_operations(conn: sqlite3.Connection) -> None:
+    from mapi_capabilities.schema import ensure_git_commit_operation_schema
+
+    ensure_git_commit_operation_schema(conn)
+
+
+def _migration_0039_common_git_stage_operations(conn: sqlite3.Connection) -> None:
+    from mapi_capabilities.schema import ensure_git_stage_operation_schema
+
+    ensure_git_stage_operation_schema(conn)
+
+
+def _migration_0040_common_command_runs(conn: sqlite3.Connection) -> None:
+    from mapi_capabilities.schema import ensure_command_run_schema
+
+    ensure_command_run_schema(conn)
+
+
 MIGRATION_SEQUENCE = [
     ("0001_memory_core", _migration_0001_memory_core),
     ("0002_timeline_schema", _migration_0002_timeline_schema),
@@ -2118,6 +2142,10 @@ MIGRATION_SEQUENCE = [
     ("0034_recall_importance_decoupling", _migration_0034_recall_importance_decoupling),
     ("0035_polaris_onboarding", _migration_0035_polaris_onboarding),
     ("0036_memory_self_healing", _migration_0036_memory_self_healing),
+    ("0037_common_file_operations", _migration_0037_common_file_operations),
+    ("0038_common_git_commit_operations", _migration_0038_common_git_commit_operations),
+    ("0039_common_git_stage_operations", _migration_0039_common_git_stage_operations),
+    ("0040_common_command_runs", _migration_0040_common_command_runs),
 ]
 
 

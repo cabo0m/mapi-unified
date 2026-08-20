@@ -19,3 +19,7 @@ This repository is the integration line for one MAPI codebase on Windows and Lin
 - Polaris = MAPI Core + Linux/VPS adapter.
 
 The goal is behavioral identity of the core, not duplicated implementations. New cross-platform features belong in `mapi_core` first.
+
+## Shared host capabilities
+
+Files, Git and fixed command recipes are shared capabilities, not Windows features. They use platform adapters only for the small process-lifecycle differences required by command execution. Their audit ledgers live in the same SQLite database through migrations 0037–0040.

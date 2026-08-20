@@ -293,6 +293,63 @@ This file is generated from the public workshop registry. Run `mapi-capabilities
 | `preview` | Preview. | `preview_memory_linking_pass` | `reader` | `R0` | read | no | no | yes | no |
 | `run` | Run. | `run_memory_linking_pass` | `maintainer` | `R2` | write | no | yes | no | no |
 
+## `files`
+
+- Purpose: Use project-bound file reads and guarded writes.
+- Workshop risk: medium
+- Minimum profile: `reader`
+- Recommended first action: `list_file_roots`
+
+| Action | Purpose | Tool | Access | Risk | Read/write | External model | Mutates data | Preview | Rollback |
+|---|---|---|---|---|---|---|---|---|---|
+| `list_file_roots` | List file roots. | `list_project_file_roots` | `reader` | `R0` | read | no | no | no | no |
+| `list_directory` | List directory. | `list_project_directory` | `reader` | `R0` | read | no | no | no | no |
+| `read_file_text` | Read file text. | `read_project_file_text` | `reader` | `R0` | read | no | no | no | no |
+| `preview_file_write` | Preview file write. | `preview_project_file_write` | `agent` | `R1` | read | no | no | yes | no |
+| `apply_file_write` | Apply file write. | `apply_project_file_write` | `maintainer` | `R2` | write | no | yes | no | no |
+| `list_file_operations` | List file operations. | `list_project_file_operations` | `reader` | `R0` | read | no | no | no | no |
+| `preview_file_rollback` | Preview file rollback. | `preview_project_file_rollback` | `agent` | `R1` | read | no | no | yes | no |
+| `rollback_file_write` | Rollback file write. | `rollback_project_file_write` | `maintainer` | `R2` | write | no | yes | no | yes |
+
+## `git`
+
+- Purpose: Inspect project Git state and use guarded stage/commit operations.
+- Workshop risk: medium
+- Minimum profile: `reader`
+- Recommended first action: `git_status`
+
+| Action | Purpose | Tool | Access | Risk | Read/write | External model | Mutates data | Preview | Rollback |
+|---|---|---|---|---|---|---|---|---|---|
+| `list_git_repositories` | List git repositories. | `list_project_git_repositories` | `reader` | `R0` | read | no | no | no | no |
+| `git_info` | Git info. | `project_git_info` | `reader` | `R0` | read | no | no | no | no |
+| `git_status` | Git status. | `project_git_status` | `reader` | `R0` | read | no | no | no | no |
+| `git_diff` | Git diff. | `project_git_diff` | `reader` | `R0` | read | no | no | no | no |
+| `git_log` | Git log. | `project_git_log` | `reader` | `R0` | read | no | no | no | no |
+| `preview_git_stage` | Preview git stage. | `preview_project_git_stage` | `agent` | `R1` | read | no | no | yes | no |
+| `apply_git_stage` | Apply git stage. | `apply_project_git_stage` | `maintainer` | `R2` | write | no | yes | no | no |
+| `list_git_stage_operations` | List git stage operations. | `list_project_git_stage_operations` | `reader` | `R0` | read | no | no | no | no |
+| `preview_git_stage_rollback` | Preview git stage rollback. | `preview_project_git_stage_rollback` | `agent` | `R1` | read | no | no | yes | no |
+| `rollback_git_stage` | Rollback git stage. | `rollback_project_git_stage` | `maintainer` | `R2` | write | no | yes | no | yes |
+| `preview_git_commit` | Preview git commit. | `preview_project_git_commit` | `agent` | `R1` | read | no | no | yes | no |
+| `apply_git_commit` | Apply git commit. | `apply_project_git_commit` | `maintainer` | `R2` | write | no | yes | no | no |
+| `list_git_commit_operations` | List git commit operations. | `list_project_git_commit_operations` | `reader` | `R0` | read | no | no | no | no |
+| `preview_git_commit_rollback` | Preview git commit rollback. | `preview_project_git_commit_rollback` | `agent` | `R1` | read | no | no | yes | no |
+| `rollback_git_commit` | Rollback git commit. | `rollback_project_git_commit` | `maintainer` | `R2` | write | no | yes | no | yes |
+
+## `commands`
+
+- Purpose: Run operator-approved fixed command recipes.
+- Workshop risk: medium
+- Minimum profile: `reader`
+- Recommended first action: `list_command_recipes`
+
+| Action | Purpose | Tool | Access | Risk | Read/write | External model | Mutates data | Preview | Rollback |
+|---|---|---|---|---|---|---|---|---|---|
+| `list_command_recipes` | List command recipes. | `list_project_command_recipes` | `reader` | `R0` | read | no | no | no | no |
+| `preview_command_recipe` | Preview command recipe. | `preview_project_command_recipe` | `agent` | `R1` | read | no | no | yes | no |
+| `run_command_recipe` | Run command recipe. | `run_project_command_recipe` | `maintainer` | `R2` | write | no | yes | no | no |
+| `list_command_runs` | List command runs. | `list_project_command_runs` | `reader` | `R0` | read | no | no | no | no |
+
 ## `admin`
 
 - Purpose: Perform dangerous local database, file and process operations.

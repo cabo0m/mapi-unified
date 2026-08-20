@@ -7,6 +7,7 @@ import types
 from typing import Any
 
 from app.runtime import admin_tools as _admin_tools
+from app.runtime import capability_tools as _capability_tools
 from app.runtime import freshness as _freshness
 from app.runtime import private_mode as _private_mode
 from app.runtime import server_runtime as _runtime
@@ -17,6 +18,7 @@ _runtime.install_runtime_overrides()
 bind_workshop_handlers(_freshness, replace=True, strict=False, local_only=True)
 bind_workshop_handlers(_private_mode, replace=True, strict=False, local_only=True)
 bind_workshop_handlers(_admin_tools, replace=True, strict=False, local_only=True)
+bind_workshop_handlers(_capability_tools, replace=True, strict=False, local_only=True)
 bind_workshop_handlers(_timeline_tools, replace=True, strict=False, local_only=True)
 _registry_report = validate_workshop_handler_registry()
 if not _registry_report["complete"]:

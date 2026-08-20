@@ -42,6 +42,10 @@ EXPECTED_VERSIONS = {
     "0034_recall_importance_decoupling",
     "0035_polaris_onboarding",
     "0036_memory_self_healing",
+    "0037_common_file_operations",
+    "0038_common_git_commit_operations",
+    "0039_common_git_stage_operations",
+    "0040_common_command_runs",
 }
 
 
@@ -348,11 +352,19 @@ def test_bridge_retirement_upgrade_removes_only_bridge_tables() -> None:
         "0034_recall_importance_decoupling",
         "0035_polaris_onboarding",
         "0036_memory_self_healing",
+        "0037_common_file_operations",
+        "0038_common_git_commit_operations",
+        "0039_common_git_stage_operations",
+        "0040_common_command_runs",
     ]
     assert tables_after == (tables_before - {"bridge_messages", "bridge_threads"}) | {
         "mcp_idempotency_requests",
         "polaris_onboarding",
         "memory_self_healing_issues",
+        "file_operations",
+        "git_commit_operations",
+        "git_stage_operations",
+        "command_recipe_runs",
     }
     assert protected_counts_after == protected_counts_before
     assert "0018_bridge_mailbox" in db_migrations.applied_migration_versions(conn)
@@ -361,6 +373,7 @@ def test_bridge_retirement_upgrade_removes_only_bridge_tables() -> None:
     assert "0034_recall_importance_decoupling" in db_migrations.applied_migration_versions(conn)
     assert "0035_polaris_onboarding" in db_migrations.applied_migration_versions(conn)
     assert "0036_memory_self_healing" in db_migrations.applied_migration_versions(conn)
+    assert "0040_common_command_runs" in db_migrations.applied_migration_versions(conn)
 
 
 def test_bridge_retirement_drop_is_idempotent() -> None:
