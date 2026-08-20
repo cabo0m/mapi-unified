@@ -20,15 +20,13 @@ from urllib.parse import urlparse
 from app.runtime.owner_credentials import valid_owner_password_hash
 from mapi.backup import ensure_initial_backup
 from mapi.env import default_instance_root, parse_environment_file
-from mapi.system_install import (
+from mapi_platform.linux.system_install import (
     install_systemd_maintenance_timer,
     install_systemd_service,
     maintenance_unit_names,
-    mcp_connection_urls,
     normalize_systemd_service_name,
-    probe_http_endpoint,
-    wait_for_listener,
 )
+from mapi_platform.network import mcp_connection_urls, probe_http_endpoint, wait_for_listener
 
 MAPI_INIT_SCHEMA = "mapi_instance_init.v1"
 MAPI_INIT_MANIFEST_SCHEMA = "mapi_instance_manifest.v1"
@@ -82,7 +80,9 @@ def _validated_identifier(value: str, field: str) -> str:
 
 
 def detect_repository_root() -> Path | None:
-    candidates = [Path(__file__).resolve().parents[1], Path.cwd().resolve()]
+    # Repository provenance belongs to a source checkout, never to an arbitrary
+    # directory from which an installed wheel happened to be launched.
+    candidates = [Path(__file__).resolve().parents[1]]
     seen: set[Path] = set()
     for candidate in candidates:
         if candidate in seen:
@@ -132,7 +132,11 @@ def validate_init_options(options: InitOptions) -> dict[str, Any]:
         raise ValueError("single_owner_remote_auth_requires_admin_profile")
     if not 1 <= int(options.port) <= 65535:
         raise ValueError("invalid_runtime_port")
-    service_name = normalize_systemd_service_name(options.service_name)
+    service_name = (
+        normalize_systemd_service_name(options.service_name)
+        if mode != "local"
+        else (_text(options.service_name) or "mapi")
+    )
     owner_key = _validated_identifier(options.owner_key, "owner_key")
     subject_key = _validated_identifier(options.agent_subject_key, "agent_subject_key")
     project_key = _validated_identifier(options.agent_project_key, "agent_project_key")
@@ -226,8 +230,9 @@ def _environment_values(options: InitOptions, validated: Mapping[str, Any]) -> d
         "MAPI_LOG_LEVEL": "INFO",
         "MAPI_REQUEST_TIMEOUT_SECONDS": "30",
         "MAPI_REMOTE_AUTH_ENABLED": "true" if remote_enabled else "false",
-        "MAPI_SYSTEMD_SERVICE_NAME": str(validated["service_name"]),
     }
+    if mode != "local":
+        values["MAPI_SYSTEMD_SERVICE_NAME"] = str(validated["service_name"])
     if repository_root is not None:
         values["MAPI_REPOSITORY_ROOT"] = str(repository_root)
     if options.recovery_command_json:
@@ -607,7 +612,7 @@ def initialize_instance(options: InitOptions) -> dict[str, Any]:
             "host": "127.0.0.1",
             "port": int(options.port),
             "profile": validated["profile"],
-            "systemd_service": validated["service_name"],
+            "systemd_service": validated["service_name"] if validated["mode"] != "local" else None,
         },
         "remote_auth_enabled": validated["mode"] == "vps-remote-auth",
         "public_url": validated.get("public_url"),

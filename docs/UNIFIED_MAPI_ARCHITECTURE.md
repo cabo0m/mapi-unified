@@ -23,3 +23,7 @@ The goal is behavioral identity of the core, not duplicated implementations. New
 ## Shared host capabilities
 
 Files, Git and fixed command recipes are shared capabilities, not Windows features. They use platform adapters only for the small process-lifecycle differences required by command execution. Their audit ledgers live in the same SQLite database through migrations 0037–0040.
+
+## Windows distribution
+
+The Windows distribution uses `install-windows.ps1`, a private venv under `%LOCALAPPDATA%\MAPI`, the same `~/.mapi-agent-memory` instance layout as the cross-platform runtime, and a Windows Task Scheduler maintenance job. It does not use the legacy Aurora JSON configuration or a separate memory schema.

@@ -61,15 +61,17 @@ cd mapi-agent-memory
 python -m venv .venv
 ```
 
-Windows PowerShell:
+Windows PowerShell from a source checkout:
 
 ```powershell
 .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -e .
-mapi-init
-mapi-server
+mapi init
+mapi start
 ```
+
+The unified Windows release bundle can instead be installed with `install-windows.ps1`. It creates a private venv under `%LOCALAPPDATA%\MAPI`, uses the same `~/.mapi-agent-memory` instance layout as Linux, registers safe nightly maintenance through Windows Task Scheduler, and preserves instance data during a normal uninstall. The legacy `mapi-init`, `mapi-server`, `mapi-doctor` and other direct entry points remain supported for scripts and compatibility.
 
 Linux:
 

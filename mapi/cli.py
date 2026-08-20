@@ -63,7 +63,7 @@ def _init_parser() -> argparse.ArgumentParser:
     parser.add_argument("--oauth-redirect-uri", action="append", default=[])
     parser.add_argument("--owner-login")
     parser.add_argument("--service-user")
-    parser.add_argument("--service-name", help="systemd service name, e.g. polaris or polaris.service")
+    parser.add_argument("--service-name", help="Linux systemd service name for VPS modes")
     parser.add_argument("--recovery-command-json")
     parser.add_argument("--resume", action="store_true", help="Resume an existing init without duplicating self seeds")
     parser.add_argument("--no-self-seed", action="store_true", help="Do not create neutral Agent Self Model bootstrap records")
@@ -250,7 +250,7 @@ def server() -> None:
     _apply_runtime_cli_environment()
     os.environ.setdefault("MCP_SURFACE_PROFILE", "agent")
     os.environ.setdefault("MAPI_RUNTIME_HOST", "127.0.0.1")
-    from mapi.system_install import mcp_connection_urls
+    from mapi_platform.network import mcp_connection_urls
 
     urls = mcp_connection_urls(
         public_origin=os.environ.get("MAPI_REMOTE_BASE_URL"),
@@ -262,3 +262,63 @@ def server() -> None:
     from app.runtime.server_runtime import run_server
 
     run_server()
+
+
+
+def _main_help() -> str:
+    return """MAPI
+
+Usage:
+  mapi init [options]
+  mapi start [--root PATH]
+  mapi doctor [--root PATH] [--deep]
+  mapi migrate [--root PATH]
+  mapi recover [--root PATH] [--execute]
+  mapi maintenance --root PATH [--apply-safe-metadata] [--json]
+  mapi capabilities
+  mapi version
+"""
+
+
+def main() -> None:
+    import importlib.metadata
+
+    argv = list(sys.argv[1:])
+    if not argv or argv[0] in {"-h", "--help", "help"}:
+        print(_main_help())
+        return
+    command = argv.pop(0)
+    if command in {"-V", "--version", "version"}:
+        try:
+            print(importlib.metadata.version("mapi-agent-memory"))
+        except importlib.metadata.PackageNotFoundError:
+            print("source-checkout")
+        return
+    if command == "maintenance":
+        from mapi.maintenance import main as maintenance_main
+
+        raise SystemExit(maintenance_main(argv))
+    if command == "capabilities":
+        from mapi.capabilities import main as capabilities_main
+
+        if argv:
+            raise SystemExit("mapi capabilities takes no arguments")
+        capabilities_main()
+        return
+    handlers = {
+        "init": init,
+        "start": server,
+        "server": server,
+        "doctor": doctor,
+        "migrate": migrate,
+        "recover": recover,
+        "seed-demo": seed_demo,
+        "demo": demo,
+    }
+    handler = handlers.get(command)
+    if handler is None:
+        print(f"unknown command: {command}", file=sys.stderr)
+        print(_main_help(), file=sys.stderr)
+        raise SystemExit(2)
+    sys.argv = [f"mapi {command}", *argv]
+    handler()

@@ -64,6 +64,8 @@ def test_readme_quickstart_matches_console_entry_points() -> None:
     metadata = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     scripts = metadata["project"]["scripts"]
     required = {
+        "mapi": "mapi.cli:main",
+        "mapi-maintenance": "mapi.maintenance:main",
         "mapi-init": "mapi.cli:init",
         "mapi-server": "mapi.cli:server",
         "mapi-migrate": "mapi.cli:migrate",
@@ -74,7 +76,7 @@ def test_readme_quickstart_matches_console_entry_points() -> None:
         "mapi-capabilities": "mapi.capabilities:main",
     }
     assert scripts == required
-    for command in ("mapi-init", "mapi-doctor", "mapi-recover", "mapi-server", "mapi-demo"):
+    for command in ("mapi", "mapi-init", "mapi-doctor", "mapi-recover", "mapi-server", "mapi-demo"):
         assert command in readme
     assert "pip install -e ." in readme
 
