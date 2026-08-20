@@ -39,3 +39,7 @@ Interactive owner access uses OAuth2 authorization code + PKCE with the built-in
 ## Distribution gate
 
 The release wheel must contain `mapi_core`, `mapi_capabilities`, both platform adapter trees, the retrieval corpus and all unified CLI entry points. CI runs `scripts/check_unified_wheel.py` on Linux and an isolated Windows bundle install/doctor/uninstall smoke on Windows.
+
+## Distribution identity
+
+`mapi_core` is product-neutral. User-facing distribution identity comes from `mapi_platform.identity`: Aurora on Windows and Polaris on Linux by default, overridable with `MAPI_DISTRIBUTION_NAME`. Historical database identifiers such as migration `0035_polaris_onboarding` and table `polaris_onboarding` remain unchanged for migration compatibility; they are storage history, not product branding.

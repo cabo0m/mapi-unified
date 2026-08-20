@@ -81,14 +81,14 @@ WORKSHOP = Workshop(
         ),
         WorkshopAction(
             action='onboarding_status',
-            tool_name='get_polaris_onboarding',
+            tool_name='get_mapi_onboarding',
             purpose='Read first-run Polaris onboarding state and the next single question to ask.',
             min_profile='clean_operator', risk='low', risk_class='R0',
             payload_schema={},
         ),
         WorkshopAction(
             action='onboarding_advance',
-            tool_name='advance_polaris_onboarding',
+            tool_name='advance_mapi_onboarding',
             purpose='Save one onboarding draft answer; final summary confirmation commits the reviewed profile.',
             min_profile='clean_operator', risk='medium', risk_class='R2',
             payload_schema={'step': 'str', 'value': 'str|null', 'skip': 'bool'},
@@ -98,7 +98,7 @@ WORKSHOP = Workshop(
         ),
         WorkshopAction(
             action='onboarding_revise',
-            tool_name='revise_polaris_onboarding',
+            tool_name='revise_mapi_onboarding',
             purpose='Revise one draft onboarding answer while the final summary is awaiting confirmation.',
             min_profile='clean_operator', risk='medium', risk_class='R2',
             payload_schema={'step': 'str', 'value': 'str|null', 'skip': 'bool'},
@@ -108,7 +108,7 @@ WORKSHOP = Workshop(
         ),
         WorkshopAction(
             action='onboarding_skip',
-            tool_name='skip_polaris_onboarding',
+            tool_name='skip_mapi_onboarding',
             purpose='Skip the remaining onboarding without disabling normal Polaris memory work.',
             min_profile='clean_operator', risk='medium', risk_class='R2',
             payload_schema={'reason': 'str|null'},

@@ -20,6 +20,7 @@ from urllib.parse import urlparse
 from app.runtime.owner_credentials import valid_owner_password_hash
 from mapi.backup import ensure_initial_backup
 from mapi.env import default_instance_root, parse_environment_file
+from mapi_platform.identity import distribution_name
 from mapi_platform.linux.system_install import (
     install_systemd_maintenance_timer,
     install_systemd_service,
@@ -230,6 +231,7 @@ def _environment_values(options: InitOptions, validated: Mapping[str, Any]) -> d
         "MAPI_LOG_LEVEL": "INFO",
         "MAPI_REQUEST_TIMEOUT_SECONDS": "30",
         "MAPI_REMOTE_AUTH_ENABLED": "true" if remote_enabled else "false",
+        "MAPI_DISTRIBUTION_NAME": distribution_name(),
     }
     if mode != "local":
         values["MAPI_SYSTEMD_SERVICE_NAME"] = str(validated["service_name"])

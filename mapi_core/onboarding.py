@@ -5,8 +5,11 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 
-POLARIS_ONBOARDING_SCHEMA = "polaris_onboarding.v2"
-POLARIS_ONBOARDING_VERSION = 2
+MAPI_ONBOARDING_SCHEMA = "mapi_onboarding.v2"
+MAPI_ONBOARDING_VERSION = 2
+# Backward-compatible aliases for callers that imported the old names.
+POLARIS_ONBOARDING_SCHEMA = MAPI_ONBOARDING_SCHEMA
+POLARIS_ONBOARDING_VERSION = MAPI_ONBOARDING_VERSION
 ONBOARDING_STATUSES = frozenset({"not_started", "in_progress", "completed", "skipped"})
 ONBOARDING_STEPS = (
     "agent_name",
@@ -80,11 +83,11 @@ def ensure_onboarding_schema(conn: Any) -> None:
             created_at, updated_at, completed_at, skipped_at, skip_reason
         ) VALUES (1, ?, 'not_started', 'agent_name', '{}', ?, ?, NULL, NULL, NULL)
         """,
-        (POLARIS_ONBOARDING_VERSION, now, now),
+        (MAPI_ONBOARDING_VERSION, now, now),
     )
     conn.execute(
         "UPDATE polaris_onboarding SET schema_version=? WHERE id=1 AND schema_version<?",
-        (POLARIS_ONBOARDING_VERSION, POLARIS_ONBOARDING_VERSION),
+        (MAPI_ONBOARDING_VERSION, MAPI_ONBOARDING_VERSION),
     )
 
 
@@ -96,7 +99,7 @@ def _row_to_state(row: Any) -> dict[str, Any]:
     if not isinstance(answers, dict):
         answers = {}
     return {
-        "schema_version": int(row["schema_version"] or POLARIS_ONBOARDING_VERSION),
+        "schema_version": int(row["schema_version"] or MAPI_ONBOARDING_VERSION),
         "status": str(row["status"]),
         "current_step": None if row["current_step"] is None else str(row["current_step"]),
         "answers": answers,
@@ -236,7 +239,7 @@ def advance_onboarding_state(
         WHERE id=1
         """,
         (
-            POLARIS_ONBOARDING_VERSION,
+            MAPI_ONBOARDING_VERSION,
             status,
             next_step,
             json.dumps(answers, ensure_ascii=False, sort_keys=True),
@@ -272,7 +275,7 @@ def revise_onboarding_answer_state(
         WHERE id=1
         """,
         (
-            POLARIS_ONBOARDING_VERSION,
+            MAPI_ONBOARDING_VERSION,
             json.dumps(answers, ensure_ascii=False, sort_keys=True),
             now,
         ),
@@ -343,7 +346,7 @@ def _summary_question(answers: dict[str, Any]) -> str:
     )
 
 
-def build_onboarding_payload(conn: Any) -> dict[str, Any]:
+def build_onboarding_payload(conn: Any, *, product_name: str = "MAPI") -> dict[str, Any]:
     state = get_onboarding_state(conn)
     status = state["status"]
     step = state["current_step"]
@@ -364,12 +367,12 @@ def build_onboarding_payload(conn: Any) -> dict[str, Any]:
         )
     elif required:
         assistant_instruction = (
-            "Introduce Polaris briefly and ask exactly next_question. After the user answers, BEFORE replying, "
+            f"Introduce {product_name} briefly and ask exactly next_question. After the user answers, BEFORE replying, "
             "you MUST persist that onboarding answer through the compact MCP surface: call run_workshop_action with "
             "area='memory', action='onboarding_advance' and payload containing the current step, the resolved "
             "answer value and skip=false. These pre-confirmation answers are onboarding draft state, not durable profile "
             "memories. If the user delegates a choice to you, for example asks you to choose your own assistant name, "
-            "choose a concrete value that is not an obvious association with Polaris, space, stars or stereotypical "
+            "choose a concrete value that is not an obvious association with the product name, space, stars or stereotypical "
             "AI-assistant naming. Avoid default names such as Luna, Nova, Atlas, Echo and Nox. Prefer a less predictable "
             "human-like or distinctive name, then save that draft choice before announcing it. Only after the tool succeeds "
             "should you acknowledge the saved answer and ask the next_question returned by the tool. Do not invent answers "
@@ -380,8 +383,8 @@ def build_onboarding_payload(conn: Any) -> dict[str, Any]:
 
     payload = {
         "status": "onboarding_required" if required else status,
-        "schema": POLARIS_ONBOARDING_SCHEMA,
-        "version": POLARIS_ONBOARDING_VERSION,
+        "schema": MAPI_ONBOARDING_SCHEMA,
+        "version": MAPI_ONBOARDING_VERSION,
         "onboarding_required": required,
         "current_step": step,
         "next_question": next_question,
@@ -389,7 +392,7 @@ def build_onboarding_payload(conn: Any) -> dict[str, Any]:
         "memory_policy_options": sorted(MEMORY_POLICIES),
         "autonomy_level_options": sorted(AUTONOMY_LEVELS),
         "product": {
-            "name": "Polaris",
+            "name": product_name,
             "role": "persistent memory and continuity layer for a personal AI assistant",
             "capabilities": [
                 "remember durable facts across chats",
@@ -414,7 +417,7 @@ def build_onboarding_payload(conn: Any) -> dict[str, Any]:
                 },
                 "delegated_choice_rule": (
                     "If the user asks you to choose the assistant name, choose one concrete name and use that exact "
-                    "name as value. Do not choose an obvious Polaris/space/AI-assistant association. Avoid Luna, Nova, "
+                    "name as value. Do not choose an obvious product-name/space/AI-assistant association. Avoid Luna, Nova, "
                     "Atlas, Echo and Nox; prefer a less predictable human-like or distinctive name. Save it before "
                     "telling the user the choice."
                     if step == "agent_name"
@@ -442,8 +445,8 @@ def build_onboarding_payload(conn: Any) -> dict[str, Any]:
             "zmień swoje imię",
         ]
         payload["completion_note"] = (
-            "Polaris przechowuje trwałą pamięć po to, aby asystent mógł zachować ciągłość między rozmowami. "
-            "Użytkownik może w każdej chwili poprosić o zapis, odczyt, zmianę albo usunięcie pamięci."
+            f"{product_name} stores durable memory so the assistant can preserve continuity across conversations. "
+            "The user can ask to write, read, change or remove durable memory at any time."
         )
     if status == "skipped":
         payload["skip_reason"] = state["skip_reason"]

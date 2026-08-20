@@ -20,10 +20,10 @@ This file is generated from the public workshop registry. Run `mapi-capabilities
 | `steward_after_action` | Steward after action. | `preview_memory_steward_after_action` | `reader` | `R0` | read | no | no | no | no |
 | `steward_session_close` | Steward session close. | `preview_memory_steward_session_close` | `reader` | `R0` | read | no | no | no | no |
 | `steward_nightly` | Steward nightly. | `preview_memory_steward_nightly` | `reader` | `R0` | read | no | no | no | no |
-| `onboarding_status` | Onboarding status. | `get_polaris_onboarding` | `reader` | `R0` | read | no | no | no | no |
-| `onboarding_advance` | Onboarding advance. | `advance_polaris_onboarding` | `reader` | `R0` | read | no | no | no | no |
-| `onboarding_revise` | Onboarding revise. | `revise_polaris_onboarding` | `reader` | `R0` | read | no | no | no | no |
-| `onboarding_skip` | Onboarding skip. | `skip_polaris_onboarding` | `reader` | `R0` | read | no | no | no | no |
+| `onboarding_status` | Onboarding status. | `get_mapi_onboarding` | `reader` | `R0` | read | no | no | no | no |
+| `onboarding_advance` | Onboarding advance. | `advance_mapi_onboarding` | `reader` | `R0` | read | no | no | no | no |
+| `onboarding_revise` | Onboarding revise. | `revise_mapi_onboarding` | `reader` | `R0` | read | no | no | no | no |
+| `onboarding_skip` | Onboarding skip. | `skip_mapi_onboarding` | `reader` | `R0` | read | no | no | no | no |
 | `self_healing_status` | Self healing status. | `get_memory_self_healing_status` | `reader` | `R0` | read | no | no | no | no |
 | `self_healing_issue` | Self healing issue. | `get_memory_self_healing_issue` | `reader` | `R0` | read | no | no | no | no |
 | `self_healing_propose` | Self healing propose. | `propose_memory_self_healing_resolution` | `agent` | `R1` | write | no | yes | no | no |

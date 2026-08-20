@@ -131,7 +131,7 @@ def build_mapi_capabilities_payload(*, runtime_readiness: Mapping[str, Any]) -> 
                 "runtime_bind": "127.0.0.1",
                 "demo_seeded": False,
                 "self_model_seed": "local_explicit_operator_identity; vps-remote-auth namespace_guardrail_only_until_user_onboarding",
-                "guided_onboarding_schema": "polaris_onboarding.v2",
+                "guided_onboarding_schema": "mapi_onboarding.v2",
                 "guided_onboarding_steps": [
                     "agent_name",
                     "user_name",

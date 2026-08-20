@@ -7,6 +7,8 @@ import os
 import sqlite3
 import sys
 from pathlib import Path
+
+from mapi_platform.identity import distribution_name
 from typing import Any
 
 from app import db_migrations
@@ -121,12 +123,12 @@ def init() -> None:
         redirects = [item.strip() for item in existing_env["MAPI_REMOTE_OAUTH_REDIRECT_URIS"].split(",") if item.strip()]
     if mode == "vps-remote-auth" and interactive:
         if not args.owner_login and not existing_env.get("MAPI_REMOTE_OWNER_LOGIN"):
-            owner_login = input("Polaris owner login (owner): ").strip() or "owner"
+            owner_login = input(f"{distribution_name()} owner login (owner): ").strip() or "owner"
         if not owner_password_hash:
             import getpass
             from app.runtime.owner_credentials import hash_owner_password
 
-            first = getpass.getpass("Polaris owner password: ")
+            first = getpass.getpass(f"{distribution_name()} owner password: ")
             second = getpass.getpass("Repeat owner password: ")
             if first != second:
                 print(json.dumps({"status": "error", "error": "owner_password_confirmation_mismatch"}, indent=2))

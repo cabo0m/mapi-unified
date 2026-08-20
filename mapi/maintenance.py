@@ -344,7 +344,7 @@ def run_maintenance(
                         conn,
                         project_key=item["project_key"],
                         expected_preview_hash=str(item["preview_hash"]),
-                        applied_by="polaris-maintenance",
+                        applied_by="mapi-maintenance",
                         reason="scheduled deterministic metadata hygiene",
                         backup_path=str(backup["path"]),
                         confirm_metadata_repair=True,

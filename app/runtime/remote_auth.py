@@ -29,6 +29,8 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from starlette.routing import Route
 
+from mapi_platform.identity import distribution_name
+
 from app.runtime.owner_credentials import verify_owner_password
 from app.runtime.remote_auth_config import RemoteAuthConfig
 from app.runtime.remote_auth_contract import (
@@ -714,6 +716,7 @@ class PrivateSQLiteOAuthProvider(OAuthProvider):
 
     def _login_html(self, *, auth: dict[str, Any], error: str | None = None) -> str:
         safe_login = html.escape(self.config.owner_login, quote=True)
+        safe_product = html.escape(distribution_name(), quote=True)
         error_html = (
             '<div class="error">Nieprawidłowy login lub hasło.</div>' if error else ""
         )
@@ -743,7 +746,7 @@ class PrivateSQLiteOAuthProvider(OAuthProvider):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Polaris · logowanie</title>
+<title>{safe_product} · logowanie</title>
 <style>
 :root {{ color-scheme: light dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }}
 body {{ margin:0; min-height:100vh; display:grid; place-items:center; background:#0f1115; color:#f5f7fb; }}
@@ -759,7 +762,7 @@ button {{ width:100%; margin-top:20px; padding:12px 14px; border:0; border-radiu
 </head>
 <body>
 <main class="card">
-<h1>Zaloguj się do Polaris</h1>
+<h1>Zaloguj się do {safe_product}</h1>
 <p>Jedno logowanie autoryzuje połączenie ChatGPT z Twoją instancją MCP.</p>
 {error_html}
 <form method="post" action="/authorize" autocomplete="on">
@@ -770,7 +773,7 @@ button {{ width:100%; margin-top:20px; padding:12px 14px; border:0; border-radiu
 <input id="password" name="password" type="password" autocomplete="current-password" required>
 <button type="submit">Zaloguj i połącz z ChatGPT</button>
 </form>
-<div class="small">Polaris · single-owner OAuth admin</div>
+<div class="small">{safe_product} · single-owner OAuth admin</div>
 </main>
 </body>
 </html>"""

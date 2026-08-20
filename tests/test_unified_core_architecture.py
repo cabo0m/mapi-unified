@@ -35,3 +35,13 @@ def test_platform_selector_reports_supported_family() -> None:
     from mapi_platform.selector import current_platform
 
     assert current_platform() in {"windows", "linux", "unsupported"}
+
+
+def test_core_has_no_distribution_brand_in_user_facing_text() -> None:
+    violations: list[str] = []
+    for path in CORE.rglob("*.py"):
+        text = path.read_text(encoding="utf-8-sig")
+        for brand in ("Polaris", "Aurora"):
+            if brand in text:
+                violations.append(f"{path.relative_to(ROOT)} contains {brand}")
+    assert violations == []

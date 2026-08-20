@@ -63,6 +63,7 @@ from app.runtime.onboarding import (
     revise_onboarding_answer_state,
     skip_onboarding_state,
 )
+from mapi_platform.identity import distribution_name
 from app.runtime.backpressure import transport_status_payload
 from app.runtime.private_mode import effective_multiuser_flag_enabled, private_owner_key, runtime_mode
 from app.runtime.context import (
@@ -6830,7 +6831,7 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             content=f"{name} is the name chosen by the user for this assistant instance.",
             summary_short=f"Assistant name: {name}",
             memory_type="identity",
-            source="polaris-onboarding",
+            source="mapi-onboarding",
             importance_score=1.0,
             confidence_score=1.0,
             tags=f"agent-self,self-model,self-evidence,identity,onboarding,chosen-by:user,subject:{subject},agent:{subject}",
@@ -6843,8 +6844,8 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             entry_type="user_profile",
             truth_kind="fact",
             title=f"Assistant name: {name}",
-            source_context="Chosen explicitly by the user during Polaris onboarding.",
-            source_event_ref="polaris-onboarding:v2:agent_name",
+            source_context="Chosen explicitly by the user during MAPI onboarding.",
+            source_event_ref="mapi-onboarding:v2:agent_name",
             supersedes_memory_id=old_id,
             importance_level="high",
             priority="high",
@@ -6859,7 +6860,7 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
                 old_memory_id=old_id,
                 relation="supersedes",
                 insert_event=_insert_memory_event,
-                source="polaris-onboarding",
+                source="mapi-onboarding",
             )
         return created_ids
 
@@ -6870,7 +6871,7 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             content=f"The user prefers to be addressed as {name}.",
             summary_short=f"User name: {name}",
             memory_type="identity",
-            source="polaris-onboarding",
+            source="mapi-onboarding",
             importance_score=0.95,
             confidence_score=1.0,
             tags="user-profile,identity,onboarding,user-name",
@@ -6883,8 +6884,8 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             entry_type="user_profile",
             truth_kind="fact",
             title=f"User name: {name}",
-            source_context="Provided explicitly by the user during Polaris onboarding.",
-            source_event_ref="polaris-onboarding:v2:user_name",
+            source_context="Provided explicitly by the user during MAPI onboarding.",
+            source_event_ref="mapi-onboarding:v2:user_name",
             importance_level="high",
             visibility_scope="private",
             priority="high",
@@ -6900,7 +6901,7 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             content=f"User work context and primary assistance needs: {text}",
             summary_short="User work context",
             memory_type="user_profile",
-            source="polaris-onboarding",
+            source="mapi-onboarding",
             importance_score=0.8,
             confidence_score=1.0,
             tags="user-profile,onboarding,work-context",
@@ -6913,8 +6914,8 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             entry_type="user_profile",
             truth_kind="fact",
             title="User work context",
-            source_context="Provided explicitly by the user during Polaris onboarding.",
-            source_event_ref="polaris-onboarding:v2:work_context",
+            source_context="Provided explicitly by the user during MAPI onboarding.",
+            source_event_ref="mapi-onboarding:v2:work_context",
             visibility_scope="private",
             ensure_embedding=False,
         )
@@ -6933,7 +6934,7 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             content=descriptions[level],
             summary_short=f"Assistant autonomy level: {level}",
             memory_type="preference",
-            source="polaris-onboarding",
+            source="mapi-onboarding",
             importance_score=0.95,
             confidence_score=1.0,
             tags="user-profile,onboarding,assistant-autonomy,interaction-policy",
@@ -6946,8 +6947,8 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             entry_type="user_profile",
             truth_kind="decision",
             title=f"Assistant autonomy level: {level}",
-            source_context="Chosen explicitly by the user during Polaris onboarding review.",
-            source_event_ref="polaris-onboarding:v2:autonomy_level",
+            source_context="Chosen explicitly by the user during MAPI onboarding review.",
+            source_event_ref="mapi-onboarding:v2:autonomy_level",
             visibility_scope="private",
             importance_level="high",
             priority="high",
@@ -6968,7 +6969,7 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             content=descriptions[policy],
             summary_short=f"Memory policy: {policy}",
             memory_type="preference",
-            source="polaris-onboarding",
+            source="mapi-onboarding",
             importance_score=1.0,
             confidence_score=1.0,
             tags="user-profile,onboarding,memory-policy,guardrail",
@@ -6981,8 +6982,8 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             entry_type="user_profile",
             truth_kind="decision",
             title=f"Memory policy: {policy}",
-            source_context="Chosen explicitly by the user during Polaris onboarding.",
-            source_event_ref="polaris-onboarding:v2:memory_policy",
+            source_context="Chosen explicitly by the user during MAPI onboarding.",
+            source_event_ref="mapi-onboarding:v2:memory_policy",
             visibility_scope="private",
             importance_level="high",
             priority="high",
@@ -6998,7 +6999,7 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             content=f"Durable-memory exclusion requested by the user: {text}",
             summary_short="User memory exclusion",
             memory_type="guardrail",
-            source="polaris-onboarding",
+            source="mapi-onboarding",
             importance_score=1.0,
             confidence_score=1.0,
             tags="user-profile,onboarding,memory-exclusion,guardrail",
@@ -7011,8 +7012,8 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             entry_type="user_profile",
             truth_kind="decision",
             title="User memory exclusion",
-            source_context="Provided explicitly by the user during Polaris onboarding.",
-            source_event_ref="polaris-onboarding:v2:memory_exclusions",
+            source_context="Provided explicitly by the user during MAPI onboarding.",
+            source_event_ref="mapi-onboarding:v2:memory_exclusions",
             visibility_scope="private",
             importance_level="high",
             priority="high",
@@ -7025,10 +7026,10 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
         project = normalize_required_text(str(value), "first_project")
         created = _insert_memory(
             conn,
-            content=f"The user's first Polaris project is {project}.",
+            content=f"The user's first MAPI project is {project}.",
             summary_short=f"Initial project: {project}",
             memory_type="project_checkpoint",
-            source="polaris-onboarding",
+            source="mapi-onboarding",
             importance_score=0.8,
             confidence_score=1.0,
             tags="onboarding,project,initial-project",
@@ -7042,7 +7043,7 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
             truth_kind="fact",
             title=f"Initial project: {project}",
             source_context="Created from the user's explicit first-project choice during onboarding.",
-            source_event_ref="polaris-onboarding:v2:first_project",
+            source_event_ref="mapi-onboarding:v2:first_project",
             importance_level="high",
             priority="normal",
             ensure_embedding=False,
@@ -7054,11 +7055,11 @@ def _persist_onboarding_answer(conn: Any, *, step: str, value: Any) -> list[int]
 
 
 @mcp.tool
-def get_polaris_onboarding() -> dict[str, Any]:
+def get_mapi_onboarding() -> dict[str, Any]:
     """Return first-run onboarding state and the single next question ChatGPT should ask the user."""
     conn = get_db_connection()
     try:
-        payload = build_onboarding_payload(conn)
+        payload = build_onboarding_payload(conn, product_name=distribution_name())
         conn.commit()
         return payload
     finally:
@@ -7066,7 +7067,7 @@ def get_polaris_onboarding() -> dict[str, Any]:
 
 
 @mcp.tool
-def advance_polaris_onboarding(
+def advance_mapi_onboarding(
     step: str,
     value: str | None = None,
     skip: bool = False,
@@ -7088,7 +7089,7 @@ def advance_polaris_onboarding(
                     )
                 )
         conn.commit()
-        payload = build_onboarding_payload(conn)
+        payload = build_onboarding_payload(conn, product_name=distribution_name())
         payload["created_memory_ids"] = created_ids
         payload["durable_profile_committed"] = bool(created_ids) and normalized_step == "summary_confirmation"
         return payload
@@ -7100,7 +7101,7 @@ def advance_polaris_onboarding(
 
 
 @mcp.tool
-def revise_polaris_onboarding(
+def revise_mapi_onboarding(
     step: str,
     value: str | None = None,
     skip: bool = False,
@@ -7110,7 +7111,7 @@ def revise_polaris_onboarding(
     try:
         revise_onboarding_answer_state(conn, step=step, value=value, skip=bool(skip))
         conn.commit()
-        payload = build_onboarding_payload(conn)
+        payload = build_onboarding_payload(conn, product_name=distribution_name())
         payload["created_memory_ids"] = []
         payload["durable_profile_committed"] = False
         return payload
@@ -7122,13 +7123,13 @@ def revise_polaris_onboarding(
 
 
 @mcp.tool
-def skip_polaris_onboarding(reason: str | None = None) -> dict[str, Any]:
-    """Skip the remaining first-run questions without disabling Polaris or its memory tools."""
+def skip_mapi_onboarding(reason: str | None = None) -> dict[str, Any]:
+    """Skip the remaining first-run questions without disabling MAPI or its memory tools."""
     conn = get_db_connection()
     try:
         skip_onboarding_state(conn, reason=reason)
         conn.commit()
-        return build_onboarding_payload(conn)
+        return build_onboarding_payload(conn, product_name=distribution_name())
     except Exception:
         conn.rollback()
         raise
@@ -7137,8 +7138,32 @@ def skip_polaris_onboarding(reason: str | None = None) -> dict[str, Any]:
 
 
 @mcp.tool
+def get_polaris_onboarding() -> dict[str, Any]:
+    """Compatibility alias for get_mapi_onboarding."""
+    return get_mapi_onboarding()
+
+
+@mcp.tool
+def advance_polaris_onboarding(step: str, value: str | None = None, skip: bool = False) -> dict[str, Any]:
+    """Compatibility alias for advance_mapi_onboarding."""
+    return advance_mapi_onboarding(step=step, value=value, skip=skip)
+
+
+@mcp.tool
+def revise_polaris_onboarding(step: str, value: str | None = None, skip: bool = False) -> dict[str, Any]:
+    """Compatibility alias for revise_mapi_onboarding."""
+    return revise_mapi_onboarding(step=step, value=value, skip=skip)
+
+
+@mcp.tool
+def skip_polaris_onboarding(reason: str | None = None) -> dict[str, Any]:
+    """Compatibility alias for skip_mapi_onboarding."""
+    return skip_mapi_onboarding(reason=reason)
+
+
+@mcp.tool
 def bootstrap_agent_context(project_key: str | None = None, limit: int = 24) -> dict[str, Any]:
-    """Restore continuity. On first run, also tell ChatGPT to guide the user through Polaris onboarding one question at a time."""
+    """Restore continuity. On first run, also tell ChatGPT to guide the user through MAPI onboarding one question at a time."""
     payload = build_bootstrap_agent_context_payload(
         project_key=project_key,
         limit=limit,
@@ -7149,7 +7174,7 @@ def bootstrap_agent_context(project_key: str | None = None, limit: int = 24) -> 
     )
     conn = get_db_connection()
     try:
-        onboarding = build_onboarding_payload(conn)
+        onboarding = build_onboarding_payload(conn, product_name=distribution_name())
         conn.commit()
     finally:
         conn.close()

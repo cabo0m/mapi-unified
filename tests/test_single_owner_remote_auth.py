@@ -108,6 +108,8 @@ from app.runtime.owner_credentials import hash_owner_password
 from app.runtime.remote_auth import PrivateSQLiteOAuthProvider
 from app.runtime.remote_auth_config import RemoteAuthConfig
 
+import os
+os.environ['MAPI_DISTRIBUTION_NAME'] = 'MAPI Test'
 BASE = 'https://mapi.example.test'
 REDIRECT = 'https://chatgpt.com/connector/oauth/dcr-test-callback'
 PASSWORD = 'a sufficiently long owner password'
@@ -167,7 +169,7 @@ async def main():
 
         login_page = await client.get('/authorize', params=params)
         assert login_page.status_code == 200, login_page.text
-        assert 'Zaloguj się do Polaris' in login_page.text
+        assert 'Zaloguj się do MAPI Test' in login_page.text
 
         accepted = await client.post('/authorize', data={
             **params,
@@ -219,6 +221,8 @@ from app.runtime.owner_credentials import hash_owner_password
 from app.runtime.remote_auth import PrivateSQLiteOAuthProvider
 from app.runtime.remote_auth_config import RemoteAuthConfig
 
+import os
+os.environ['MAPI_DISTRIBUTION_NAME'] = 'MAPI Test'
 BASE = 'https://mapi.example.test'
 REDIRECT = 'https://chatgpt.com/connector/oauth/test-callback'
 PASSWORD = 'a sufficiently long owner password'
@@ -254,7 +258,7 @@ async def main():
 
         login_page = await client.get('/authorize', params=params)
         assert login_page.status_code == 200, login_page.text
-        assert 'Zaloguj się do Polaris' in login_page.text
+        assert 'Zaloguj się do MAPI Test' in login_page.text
         assert 'action="/authorize"' in login_page.text
         assert '/oauth/login' not in login_page.text
         assert 'Basic' not in login_page.text

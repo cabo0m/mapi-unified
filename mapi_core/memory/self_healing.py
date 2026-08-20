@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Local self-healing contracts for Polaris memory.
+"""Platform-neutral self-healing contracts for MAPI memory.
 
 The module has two deliberately different paths:
 - deterministic structural repairs may run unattended after a verified backup;
@@ -408,7 +408,7 @@ def _repair_deterministic_issue(
             relation="supersedes",
             now_iso=_now,
             insert_event=insert_event,
-            source="polaris_self_healing",
+            source="mapi_self_healing",
         )
         return {"action": "complete_half_supersession", **result, "content_deleted": False}
 
@@ -703,7 +703,7 @@ def _apply_canonical_head_resolution(
         relation="supersedes",
         now_iso=_now,
         insert_event=insert_event,
-        source="polaris_self_healing_user_approved",
+        source="mapi_self_healing_user_approved",
     )
     return {
         "action": "select_canonical_head",
