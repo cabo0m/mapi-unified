@@ -44,3 +44,13 @@ def test_corpus_json_is_declared_as_package_data() -> None:
     package_data = metadata["tool"]["setuptools"]["package-data"]
     assert package_data["app.sandman.corpora"] == ["*.json"]
     assert package_data["mapi_core.memory.corpora"] == ["*.json"]
+
+
+def test_package_discovery_covers_unified_roots() -> None:
+    import tomllib
+    root = Path(__file__).resolve().parents[1]
+    metadata = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    patterns = metadata["tool"]["setuptools"]["packages"]["find"]["include"]
+    assert "mapi*" in patterns
+    for package_root in ("mapi_core", "mapi_capabilities", "mapi_platform"):
+        assert (root / package_root / "__init__.py").is_file()

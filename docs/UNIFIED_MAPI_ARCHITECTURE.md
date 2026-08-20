@@ -35,3 +35,7 @@ The canonical admin action is `run_shell`. It remains an explicit R3/admin host-
 ## Remote authentication
 
 Interactive owner access uses OAuth2 authorization code + PKCE with the built-in owner login. For non-interactive automation the operator may explicitly issue a revocable `service` bearer token. Service tokens are admin-profile, stored only as hashes, expire, are rate-limited and can be revoked by fingerprint. The retired legacy Codex bearer path remains disabled, and trusted-proxy identity auth is not restored.
+
+## Distribution gate
+
+The release wheel must contain `mapi_core`, `mapi_capabilities`, both platform adapter trees, the retrieval corpus and all unified CLI entry points. CI runs `scripts/check_unified_wheel.py` on Linux and an isolated Windows bundle install/doctor/uninstall smoke on Windows.

@@ -323,6 +323,7 @@
     "scripts/build_windows_bundle.py",
     "scripts/check_mcp_surface.py",
     "scripts/check_python_syntax.py",
+    "scripts/check_unified_wheel.py",
     "scripts/demo_project_memory.py",
     "scripts/maintenance/apply_backup_retention.py",
     "scripts/maintenance/preview_backup_retention.py",
