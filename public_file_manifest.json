@@ -409,6 +409,7 @@
     "tests/test_sandman_v3_validator.py",
     "tests/test_schemas.py",
     "tests/test_semantic_search.py",
+    "tests/test_service_bearer_auth.py",
     "tests/test_single_owner_remote_auth.py",
     "tests/test_smoke_mcp_cli.py",
     "tests/test_system_install.py",

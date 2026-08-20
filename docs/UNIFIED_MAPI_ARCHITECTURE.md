@@ -31,3 +31,7 @@ The Windows distribution uses `install-windows.ps1`, a private venv under `%LOCA
 ## Administrative shell
 
 The canonical admin action is `run_shell`. It remains an explicit R3/admin host-level grant. Windows executes it through PowerShell; Linux executes it through bash/sh. `run_powershell` remains a Windows-only compatibility alias and returns `powershell_windows_only` on Linux.
+
+## Remote authentication
+
+Interactive owner access uses OAuth2 authorization code + PKCE with the built-in owner login. For non-interactive automation the operator may explicitly issue a revocable `service` bearer token. Service tokens are admin-profile, stored only as hashes, expire, are rate-limited and can be revoked by fingerprint. The retired legacy Codex bearer path remains disabled, and trusted-proxy identity auth is not restored.

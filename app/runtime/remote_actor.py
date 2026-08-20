@@ -29,7 +29,7 @@ def access_token_actor(token: Any | None = None) -> dict[str, Any] | None:
         and requested_profile in REMOTE_ALLOWED_PROFILES
         and requested_profile not in REMOTE_FORBIDDEN_PROFILES
         and requested_profile == "admin"
-        and channel == "oauth"
+        and channel in {"oauth", "service"}
     )
     return {
         "authenticated": True,

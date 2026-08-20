@@ -42,6 +42,8 @@ from app.runtime.remote_auth_contract import (
     REMOTE_OAUTH_PROFILE,
     REMOTE_OAUTH_SCOPES,
     REMOTE_REQUIRED_SCOPE,
+    REMOTE_SERVICE_PROFILE,
+    REMOTE_SERVICE_SCOPES,
     TOKEN_KINDS,
 )
 from app.runtime.remote_auth_store import ensure_remote_auth_schema
@@ -1076,6 +1078,67 @@ button {{ width:100%; margin-top:20px; padding:12px 14px; border:0; border-radiu
         )
 
 
+class ServiceBearerVerifier(TokenVerifier):
+    """Revocable non-interactive admin bearer for explicitly authorized automation."""
+
+    def __init__(self, *, config: RemoteAuthConfig, db_path: str | Path) -> None:
+        errors = config.validate()
+        if errors:
+            raise ValueError("invalid_remote_auth_config:" + ",".join(errors))
+        super().__init__(base_url=config.base_url, required_scopes=[REMOTE_REQUIRED_SCOPE])
+        self.config = config
+        self.store = RemoteAuthStore(db_path)
+
+    async def verify_token(self, token: str) -> AccessToken | None:
+        token_hash = _secret_hash(token)
+        bucket = "service-token:" + _fingerprint_from_hash(token_hash)
+        if not self.store.rate_allowed(
+            bucket=bucket,
+            action="service_bearer_verify",
+            window_seconds=self.config.rate_limit_window_seconds,
+            max_attempts=self.config.rate_limit_max_attempts,
+        ):
+            self.store.audit(
+                event_type="service_bearer_verify",
+                channel="service",
+                outcome="denied",
+                reason_code="rate_limited",
+                token_hash=token_hash,
+            )
+            return None
+        row = self.store.load_token(token, token_kind="service")
+        status = self.store.token_status(row)
+        if status != "ok" or row is None:
+            self.store.audit(
+                event_type="service_bearer_verify",
+                channel="service",
+                outcome="denied",
+                reason_code=f"service_{status}",
+                token_hash=token_hash,
+            )
+            return None
+        if str(row["owner_key"]) != self.config.owner_key or str(row["profile"]) != REMOTE_SERVICE_PROFILE:
+            return None
+        scopes = _parse_json_list(row["scopes_json"])
+        if not set(REMOTE_SERVICE_SCOPES).issubset(set(scopes)):
+            return None
+        self.store.touch_token(token)
+        return AccessToken(
+            token=token,
+            client_id=str(row["client_id"]),
+            scopes=scopes,
+            expires_at=None if row["expires_at"] is None else int(row["expires_at"]),
+            claims={
+                "owner_key": str(row["owner_key"]),
+                "profile": str(row["profile"]),
+                "auth_channel": "service",
+                "token_kind": "service",
+                "subject": str(row["owner_key"]),
+                "label": row["label"],
+            },
+        )
+
+
 class CodexBearerVerifier(TokenVerifier):
     def __init__(self, *, config: RemoteAuthConfig, db_path: str | Path) -> None:
         errors = config.validate()
@@ -1136,15 +1199,77 @@ def issue_codex_bearer_token(**_: Any) -> dict[str, Any]:
     raise RuntimeError("codex_bearer_retired_single_owner_admin_oauth")
 
 
+def issue_service_bearer_token(
+    *,
+    db_path: str | Path,
+    owner_key: str = REMOTE_AUTH_OWNER_KEY,
+    label: str = "service",
+    ttl_seconds: int = 90 * 24 * 3600,
+    now: int | None = None,
+) -> dict[str, Any]:
+    owner = str(owner_key or "").strip().lower()
+    if owner != REMOTE_AUTH_OWNER_KEY:
+        raise ValueError("service_token_owner_must_be_owner")
+    normalized_label = str(label or "").strip()
+    if not normalized_label or len(normalized_label) > 80:
+        raise ValueError("service_token_label_invalid")
+    ttl = int(ttl_seconds)
+    if ttl < 3600 or ttl > 10 * 365 * 24 * 3600:
+        raise ValueError("service_token_ttl_out_of_range")
+    raw_token = "mapi_sv_" + secrets.token_urlsafe(48)
+    store = RemoteAuthStore(db_path)
+    expires_at = int(now if now is not None else _now_epoch()) + ttl
+    token_hash = store.insert_token(
+        raw_token=raw_token,
+        token_kind="service",
+        client_id="service-client",
+        owner_key=owner,
+        profile=REMOTE_SERVICE_PROFILE,
+        scopes=REMOTE_SERVICE_SCOPES,
+        expires_at=expires_at,
+        label=normalized_label,
+    )
+    store.audit(
+        event_type="service_token_issue",
+        channel="service",
+        outcome="allowed",
+        reason_code="service_token_issued",
+        token_hash=token_hash,
+        client_id="service-client",
+        owner_key=owner,
+        profile=REMOTE_SERVICE_PROFILE,
+    )
+    return {
+        "status": "issued",
+        "token": raw_token,
+        "token_fingerprint": _fingerprint_from_hash(token_hash),
+        "owner_key": owner,
+        "profile": REMOTE_SERVICE_PROFILE,
+        "scopes": list(REMOTE_SERVICE_SCOPES),
+        "expires_at": expires_at,
+        "warning": "The raw token is returned once and is never stored in the database.",
+    }
+
+
+def revoke_token_fingerprint(*, db_path: str | Path, fingerprint: str) -> dict[str, Any]:
+    revoked = RemoteAuthStore(db_path).revoke_by_fingerprint(fingerprint)
+    return {
+        "status": "revoked" if revoked else "not_found",
+        "fingerprint": fingerprint,
+        "revoked_token_rows": revoked,
+    }
+
+
 def build_remote_auth_provider(
     *,
     config: RemoteAuthConfig,
     db_path: str | Path,
 ) -> MultiAuth:
     oauth = PrivateSQLiteOAuthProvider(config=config, db_path=db_path)
+    service = ServiceBearerVerifier(config=config, db_path=db_path)
     return MultiAuth(
         server=oauth,
-        verifiers=[],
+        verifiers=[service],
         base_url=config.base_url,
         resource_base_url=config.base_url,
         required_scopes=[REMOTE_REQUIRED_SCOPE],
@@ -1199,6 +1324,12 @@ def remote_auth_status(
                     (_now_epoch(),),
                 ).fetchone()[0]
             ),
+            "active_service_tokens": int(
+                conn.execute(
+                    "SELECT COUNT(*) FROM remote_auth_tokens WHERE token_kind='service' AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at>?)",
+                    (_now_epoch(),),
+                ).fetchone()[0]
+            ),
             "revoked_tokens": int(
                 conn.execute("SELECT COUNT(*) FROM remote_auth_tokens WHERE revoked_at IS NOT NULL").fetchone()[0]
             ),
@@ -1228,12 +1359,19 @@ def remote_auth_status(
             "authorization_code_ttl_seconds": resolved.authorization_code_ttl_seconds,
             "profile": REMOTE_OAUTH_PROFILE,
         },
+        "service_tokens": {
+            "profile": REMOTE_SERVICE_PROFILE,
+            "scopes": list(REMOTE_SERVICE_SCOPES),
+            "stored_hashed": True,
+            "revocation_supported": True,
+            "issued_by_operator_only": True,
+        },
         "legacy_codex": {
             "status": "retired_not_accepted",
             "stored_token_rows_ignored": True,
         },
         "remote_admin_exposed": True,
-        "remote_admin_auth_channel": "owner_oauth_only",
+        "remote_admin_auth_channel": "owner_oauth_or_explicit_service_token",
         "single_remote_user": True,
         "profiles_derive_from_auth": True,
         "raw_tokens_stored": False,

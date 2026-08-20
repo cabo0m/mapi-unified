@@ -2105,6 +2105,12 @@ def _migration_0040_common_command_runs(conn: sqlite3.Connection) -> None:
     ensure_command_run_schema(conn)
 
 
+def _migration_0041_revocable_service_auth(conn: sqlite3.Connection) -> None:
+    from app.runtime.remote_auth_store import upgrade_remote_auth_service_tokens
+
+    upgrade_remote_auth_service_tokens(conn)
+
+
 MIGRATION_SEQUENCE = [
     ("0001_memory_core", _migration_0001_memory_core),
     ("0002_timeline_schema", _migration_0002_timeline_schema),
@@ -2146,6 +2152,7 @@ MIGRATION_SEQUENCE = [
     ("0038_common_git_commit_operations", _migration_0038_common_git_commit_operations),
     ("0039_common_git_stage_operations", _migration_0039_common_git_stage_operations),
     ("0040_common_command_runs", _migration_0040_common_command_runs),
+    ("0041_revocable_service_auth", _migration_0041_revocable_service_auth),
 ]
 
 

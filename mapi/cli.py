@@ -275,6 +275,9 @@ Usage:
   mapi migrate [--root PATH]
   mapi recover [--root PATH] [--execute]
   mapi maintenance --root PATH [--apply-safe-metadata] [--json]
+  mapi remote status [--root PATH]
+  mapi remote issue-service-token [--root PATH] [--label NAME] [--ttl-days N]
+  mapi remote revoke <fingerprint> [--root PATH]
   mapi capabilities
   mapi version
 """
@@ -298,6 +301,48 @@ def main() -> None:
         from mapi.maintenance import main as maintenance_main
 
         raise SystemExit(maintenance_main(argv))
+    if command == "remote":
+        parser = argparse.ArgumentParser(prog="mapi remote")
+        sub = parser.add_subparsers(dest="remote_command", required=True)
+        status_parser = sub.add_parser("status")
+        status_parser.add_argument("--root", "--instance-root", dest="root", type=Path)
+        issue_parser = sub.add_parser("issue-service-token")
+        issue_parser.add_argument("--root", "--instance-root", dest="root", type=Path)
+        issue_parser.add_argument("--label", default="service")
+        issue_parser.add_argument("--ttl-days", type=int, default=90)
+        revoke_parser = sub.add_parser("revoke")
+        revoke_parser.add_argument("fingerprint")
+        revoke_parser.add_argument("--root", "--instance-root", dest="root", type=Path)
+        parsed = parser.parse_args(argv)
+        if parsed.root is not None:
+            os.environ["MAPI_ROOT"] = str(parsed.root.expanduser().resolve())
+            os.environ["MAPI_ENV_FILE"] = str(parsed.root.expanduser().resolve() / ".env")
+        runtime = apply_runtime_environment()
+        db_path = Path(runtime.get("MAPI_DB_PATH") or _database_path()).expanduser().resolve()
+        from app.runtime.remote_auth import issue_service_bearer_token, remote_auth_status, revoke_token_fingerprint
+        from app.runtime.remote_auth_config import RemoteAuthConfig
+
+        config = RemoteAuthConfig.from_env()
+        if parsed.remote_command == "status":
+            print(json.dumps(remote_auth_status(db_path=db_path, config=config), indent=2, ensure_ascii=False))
+            return
+        errors = config.validate()
+        if not config.enabled:
+            errors.append("remote_auth_not_enabled")
+        if errors:
+            print(json.dumps({"status": "blocked", "errors": errors}, indent=2, ensure_ascii=False))
+            raise SystemExit(2)
+        if parsed.remote_command == "issue-service-token":
+            payload = issue_service_bearer_token(
+                db_path=db_path,
+                owner_key=config.owner_key,
+                label=parsed.label,
+                ttl_seconds=int(parsed.ttl_days) * 24 * 3600,
+            )
+        else:
+            payload = revoke_token_fingerprint(db_path=db_path, fingerprint=parsed.fingerprint)
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        return
     if command == "capabilities":
         from mapi.capabilities import main as capabilities_main
 

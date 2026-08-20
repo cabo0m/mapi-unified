@@ -95,7 +95,7 @@ def test_migration_0029_creates_ledgers_and_repairs_project_owner_mapping() -> N
         1,
     )
     versions = [row[0] for row in conn.execute("SELECT version FROM schema_migrations ORDER BY version")]
-    assert versions[-1] == "0040_common_command_runs"
+    assert versions[-1] == "0041_revocable_service_auth"
 
 
 def test_scope_policy_preserves_semantic_global_and_repairs_missing_project_scope() -> None:

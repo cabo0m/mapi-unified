@@ -1,11 +1,22 @@
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 from app.runtime.remote_actor import access_token_actor
-from app.runtime.remote_auth_contract import REMOTE_OAUTH_PROFILE, REMOTE_OAUTH_SCOPES
+from app.runtime.remote_auth_contract import REMOTE_OAUTH_PROFILE, REMOTE_OAUTH_SCOPES, REMOTE_SERVICE_PROFILE, REMOTE_SERVICE_SCOPES
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def _subprocess_env() -> dict[str, str]:
+    env = dict(os.environ)
+    current = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = str(ROOT) if not current else str(ROOT) + os.pathsep + current
+    return env
 
 
 def test_single_remote_oauth_identity_is_admin() -> None:
@@ -14,7 +25,7 @@ def test_single_remote_oauth_identity_is_admin() -> None:
     assert "offline_access" in REMOTE_OAUTH_SCOPES
 
 
-def test_remote_actor_accepts_only_owner_oauth_admin() -> None:
+def test_remote_actor_accepts_owner_oauth_or_explicit_service_admin() -> None:
     admin = SimpleNamespace(
         claims={"owner_key": "owner", "profile": "admin", "auth_channel": "oauth"},
         client_id="owner-client",
@@ -24,6 +35,16 @@ def test_remote_actor_accepts_only_owner_oauth_admin() -> None:
     assert actor is not None
     assert actor["valid"] is True
     assert actor["profile"] == "admin"
+
+    service = SimpleNamespace(
+        claims={"owner_key": "owner", "profile": "admin", "auth_channel": "service"},
+        client_id="service-client",
+        scopes=["mapi:read", "mapi:write", "mapi:admin"],
+    )
+    service_actor = access_token_actor(service)
+    assert service_actor is not None
+    assert service_actor["valid"] is True
+    assert service_actor["profile"] == "admin"
 
     for claims in (
         {"owner_key": "owner", "profile": "agent", "auth_channel": "oauth"},
@@ -36,11 +57,11 @@ def test_remote_actor_accepts_only_owner_oauth_admin() -> None:
         assert denied["profile"] == "reader"
 
 
-def test_runtime_auth_has_only_owner_oauth_path(tmp_path) -> None:
+def test_runtime_auth_has_owner_oauth_plus_explicit_service_path(tmp_path) -> None:
     code = """
 from pathlib import Path
 from app.runtime.owner_credentials import hash_owner_password
-from app.runtime.remote_auth import build_remote_auth_provider, issue_codex_bearer_token
+from app.runtime.remote_auth import build_remote_auth_provider, issue_codex_bearer_token, ServiceBearerVerifier
 from app.runtime.remote_auth_config import RemoteAuthConfig
 config = RemoteAuthConfig(
     enabled=True,
@@ -53,7 +74,8 @@ config = RemoteAuthConfig(
 )
 provider = build_remote_auth_provider(config=config, db_path=Path('auth-test.db'))
 assert provider.server is not None
-assert provider.verifiers == []
+assert len(provider.verifiers) == 1
+assert isinstance(provider.verifiers[0], ServiceBearerVerifier)
 try:
     issue_codex_bearer_token(db_path='ignored.db')
 except RuntimeError as exc:
@@ -64,6 +86,7 @@ else:
     completed = subprocess.run(
         [sys.executable, "-c", code],
         cwd=tmp_path,
+        env=_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,
@@ -174,6 +197,7 @@ asyncio.run(main())
     completed = subprocess.run(
         [sys.executable, '-c', code],
         cwd=tmp_path,
+        env=_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,
@@ -289,6 +313,7 @@ asyncio.run(main())
     completed = subprocess.run(
         [sys.executable, "-c", code],
         cwd=tmp_path,
+        env=_subprocess_env(),
         capture_output=True,
         text=True,
         check=False,

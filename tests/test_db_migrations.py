@@ -46,6 +46,7 @@ EXPECTED_VERSIONS = {
     "0038_common_git_commit_operations",
     "0039_common_git_stage_operations",
     "0040_common_command_runs",
+    "0041_revocable_service_auth",
 }
 
 
@@ -356,6 +357,7 @@ def test_bridge_retirement_upgrade_removes_only_bridge_tables() -> None:
         "0038_common_git_commit_operations",
         "0039_common_git_stage_operations",
         "0040_common_command_runs",
+        "0041_revocable_service_auth",
     ]
     assert tables_after == (tables_before - {"bridge_messages", "bridge_threads"}) | {
         "mcp_idempotency_requests",
@@ -373,7 +375,7 @@ def test_bridge_retirement_upgrade_removes_only_bridge_tables() -> None:
     assert "0034_recall_importance_decoupling" in db_migrations.applied_migration_versions(conn)
     assert "0035_polaris_onboarding" in db_migrations.applied_migration_versions(conn)
     assert "0036_memory_self_healing" in db_migrations.applied_migration_versions(conn)
-    assert "0040_common_command_runs" in db_migrations.applied_migration_versions(conn)
+    assert "0041_revocable_service_auth" in db_migrations.applied_migration_versions(conn)
 
 
 def test_bridge_retirement_drop_is_idempotent() -> None:
