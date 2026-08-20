@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0a1 - 2026-08-20
+
+- Start the Unified MAPI line: one platform-neutral `mapi_core` shared by Aurora (Windows) and Polaris (Linux/VPS).
+- Add shared project Files, guarded writes, Git stage/commit/rollback and fixed command recipes.
+- Add Windows Task Scheduler/install bundle and Linux systemd adapters around the same runtime and SQLite schema.
+- Add platform-native R3 admin shell, artifact-based freshness for installed wheels and distribution identity outside Core.
+- Add explicit revocable service bearer auth alongside owner OAuth/PKCE.
+- Add guarded legacy Aurora import with preview hash, target backup, ID remapping, sensitive-memory quarantine and an audit/archive ledger; Polaris databases upgrade in place.
+- Add cross-platform wheel and Windows bundle release gates.
+
+
 ## 0.1.0rc2 — 2026-08-06
 
 - repositioned MAPI as persistent, auditable project memory for MCP clients;
