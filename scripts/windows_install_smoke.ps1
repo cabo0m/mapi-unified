@@ -50,7 +50,10 @@ try {
         if ($LASTEXITCODE -ne 0) { throw "bundle install failed" }
         $Shim = Join-Path $Install "bin\mapi.cmd"
         if (-not (Test-Path -LiteralPath $Shim -PathType Leaf)) { throw "mapi shim missing" }
-        if (-not (Test-Path -LiteralPath (Join-Path $Instance ".env") -PathType Leaf)) { throw "instance env missing" }
+        $EnvPath = Join-Path $Instance ".env"
+        if (-not (Test-Path -LiteralPath $EnvPath -PathType Leaf)) { throw "instance env missing" }
+        $EnvText = Get-Content -LiteralPath $EnvPath -Raw
+        if ($EnvText -notmatch '(?m)^MAPI_DISTRIBUTION_NAME=Aurora\s*$') { throw "Windows instance distribution is not Aurora" }
         if (-not (Test-Path -LiteralPath (Join-Path $Instance "data\mapi.db") -PathType Leaf)) { throw "instance database missing" }
         if ((Query-TaskExitCode $TaskName) -ne 0) { throw "maintenance task missing" }
 
@@ -74,6 +77,7 @@ try {
         Write-Host "windows_install_smoke=PASS"
         Write-Host "installed_version=$version"
         Write-Host "doctor_status=$($doctor.status)"
+        Write-Host "distribution=Aurora"
         Write-Host "maintenance_task_lifecycle=PASS"
         Write-Host "instance_preserved=PASS"
         Write-Host "default_user_db_unchanged=PASS"
