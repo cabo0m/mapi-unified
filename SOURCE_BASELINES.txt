@@ -1,6 +1,5 @@
 Unified MAPI repository baseline
 Source product: Polaris
-Source path: C:\mapi-agent-memory
 Source commit: 3bf75f1966b32513ec6ca7f819be306fb9e5d9df
 Source branch: main
 Created: 2026-08-20T01:45:39.7011268Z
