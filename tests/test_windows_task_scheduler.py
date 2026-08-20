@@ -15,7 +15,7 @@ def test_install_daily_task_uses_safe_fixed_schtasks_shape(monkeypatch) -> None:
     monkeypatch.setattr(task_scheduler, "task_scheduler_available", lambda: True)
     monkeypatch.setattr(task_scheduler, "_schtasks_executable", lambda: "schtasks.exe")
     result = task_scheduler.install_daily_task(
-        command='"C:\\MAPI\\maintenance.cmd"',
+        command='"maintenance.cmd"',
         task_name="MAPI Smoke Task",
         time_local="03:17",
         runner=runner,
@@ -23,7 +23,7 @@ def test_install_daily_task_uses_safe_fixed_schtasks_shape(monkeypatch) -> None:
     assert result["status"] == "installed"
     assert calls == [[
         "schtasks.exe", "/Create", "/F", "/SC", "DAILY", "/ST", "03:17",
-        "/TN", "MAPI Smoke Task", "/TR", '"C:\\MAPI\\maintenance.cmd"',
+        "/TN", "MAPI Smoke Task", "/TR", '"maintenance.cmd"',
     ]]
 
 
