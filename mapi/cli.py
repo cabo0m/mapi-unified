@@ -280,6 +280,7 @@ Usage:
   mapi remote status [--root PATH]
   mapi remote issue-service-token [--root PATH] [--label NAME] [--ttl-days N]
   mapi remote revoke <fingerprint> [--root PATH]
+  mapi import-aurora --source-db PATH [--root PATH] [--apply --expected-preview-hash HASH]
   mapi capabilities
   mapi version
 """
@@ -303,6 +304,34 @@ def main() -> None:
         from mapi.maintenance import main as maintenance_main
 
         raise SystemExit(maintenance_main(argv))
+    if command == "import-aurora":
+        parser = argparse.ArgumentParser(prog="mapi import-aurora")
+        parser.add_argument("--source-db", required=True, type=Path)
+        parser.add_argument("--root", "--instance-root", dest="root", type=Path)
+        parser.add_argument("--apply", action="store_true")
+        parser.add_argument("--expected-preview-hash")
+        parsed = parser.parse_args(argv)
+        if parsed.root is not None:
+            resolved_root = parsed.root.expanduser().resolve()
+            os.environ["MAPI_ROOT"] = str(resolved_root)
+            os.environ["MAPI_ENV_FILE"] = str(resolved_root / ".env")
+        apply_runtime_environment()
+        target_db = _database_path()
+        from mapi.aurora_import import apply_aurora_import, preview_aurora_import
+
+        payload = (
+            apply_aurora_import(
+                source_db=parsed.source_db,
+                target_db=target_db,
+                expected_preview_hash=parsed.expected_preview_hash,
+            )
+            if parsed.apply
+            else preview_aurora_import(source_db=parsed.source_db, target_db=target_db)
+        )
+        print(json.dumps(payload, indent=2, ensure_ascii=False, default=str))
+        if payload.get("status") in {"blocked", "stale_preview"}:
+            raise SystemExit(2)
+        return
     if command == "remote":
         parser = argparse.ArgumentParser(prog="mapi remote")
         sub = parser.add_subparsers(dest="remote_command", required=True)

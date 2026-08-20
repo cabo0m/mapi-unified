@@ -15,7 +15,7 @@ def test_fresh_migration_reaches_current_tail(tmp_path: Path) -> None:
         connection.row_factory = sqlite3.Row
         db_migrations.apply_all_migrations(connection)
         versions = sorted(db_migrations.applied_migration_versions(connection))
-    assert versions[-1] == "0041_revocable_service_auth"
+    assert versions[-1] == "0042_legacy_aurora_import"
 
 
 def test_demo_seed_is_deterministic_and_repeatable(tmp_path: Path) -> None:

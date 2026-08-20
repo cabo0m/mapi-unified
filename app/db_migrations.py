@@ -2111,6 +2111,12 @@ def _migration_0041_revocable_service_auth(conn: sqlite3.Connection) -> None:
     upgrade_remote_auth_service_tokens(conn)
 
 
+def _migration_0042_legacy_aurora_import(conn: sqlite3.Connection) -> None:
+    from app.runtime.legacy_import import ensure_aurora_import_schema
+
+    ensure_aurora_import_schema(conn)
+
+
 MIGRATION_SEQUENCE = [
     ("0001_memory_core", _migration_0001_memory_core),
     ("0002_timeline_schema", _migration_0002_timeline_schema),
@@ -2153,6 +2159,7 @@ MIGRATION_SEQUENCE = [
     ("0039_common_git_stage_operations", _migration_0039_common_git_stage_operations),
     ("0040_common_command_runs", _migration_0040_common_command_runs),
     ("0041_revocable_service_auth", _migration_0041_revocable_service_auth),
+    ("0042_legacy_aurora_import", _migration_0042_legacy_aurora_import),
 ]
 
 

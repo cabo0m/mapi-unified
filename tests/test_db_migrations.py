@@ -47,6 +47,7 @@ EXPECTED_VERSIONS = {
     "0039_common_git_stage_operations",
     "0040_common_command_runs",
     "0041_revocable_service_auth",
+    "0042_legacy_aurora_import",
 }
 
 
@@ -358,6 +359,7 @@ def test_bridge_retirement_upgrade_removes_only_bridge_tables() -> None:
         "0039_common_git_stage_operations",
         "0040_common_command_runs",
         "0041_revocable_service_auth",
+        "0042_legacy_aurora_import",
     ]
     assert tables_after == (tables_before - {"bridge_messages", "bridge_threads"}) | {
         "mcp_idempotency_requests",
@@ -367,6 +369,9 @@ def test_bridge_retirement_upgrade_removes_only_bridge_tables() -> None:
         "git_commit_operations",
         "git_stage_operations",
         "command_recipe_runs",
+        "legacy_aurora_import_runs",
+        "legacy_aurora_import_items",
+        "legacy_aurora_import_archive",
     }
     assert protected_counts_after == protected_counts_before
     assert "0018_bridge_mailbox" in db_migrations.applied_migration_versions(conn)
@@ -375,7 +380,7 @@ def test_bridge_retirement_upgrade_removes_only_bridge_tables() -> None:
     assert "0034_recall_importance_decoupling" in db_migrations.applied_migration_versions(conn)
     assert "0035_polaris_onboarding" in db_migrations.applied_migration_versions(conn)
     assert "0036_memory_self_healing" in db_migrations.applied_migration_versions(conn)
-    assert "0041_revocable_service_auth" in db_migrations.applied_migration_versions(conn)
+    assert "0042_legacy_aurora_import" in db_migrations.applied_migration_versions(conn)
 
 
 def test_bridge_retirement_drop_is_idempotent() -> None:

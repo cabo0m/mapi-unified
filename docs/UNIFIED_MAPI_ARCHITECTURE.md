@@ -43,3 +43,7 @@ The release wheel must contain `mapi_core`, `mapi_capabilities`, both platform a
 ## Distribution identity
 
 `mapi_core` is product-neutral. User-facing distribution identity comes from `mapi_platform.identity`: Aurora on Windows and Polaris on Linux by default, overridable with `MAPI_DISTRIBUTION_NAME`. Historical database identifiers such as migration `0035_polaris_onboarding` and table `polaris_onboarding` remain unchanged for migration compatibility; they are storage history, not product branding.
+
+## Legacy transition
+
+Polaris databases upgrade in place through the normal migration sequence. Legacy Aurora databases use `mapi import-aurora`: preview first, then `--apply --expected-preview-hash <hash>`. The importer requires a fresh Unified target except for neutral `mapi-init` seed memories, takes a verified target backup, remaps memory IDs, translates onboarding, and preserves incompatible operational history in a legacy archive. Remote credentials, embeddings and ephemeral runtime state are deliberately not imported. Health/financial memories are quarantined; credential/private-key/never-store payloads are not copied into the target and remain only in the untouched source database.
