@@ -27,8 +27,8 @@ ALLOWED_GIT_IDENTITIES = {
     ("GitHub", "noreply@github.com"),
 }
 EXPECTED_APACHE_LICENSE_SHA256 = "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
-CANONICAL_HTTPS_ORIGIN = "https://github.com/cabo0m/mapi-agent-memory.git"
-CANONICAL_SSH_ORIGIN = "git@github.com:cabo0m/mapi-agent-memory.git"
+CANONICAL_HTTPS_ORIGIN = "https://github.com/cabo0m/mapi-unified.git"
+CANONICAL_SSH_ORIGIN = "git@github.com:cabo0m/mapi-unified.git"
 RELEASE_TAG = re.compile(r"^v(?:0|[1-9][0-9]*)[.](?:0|[1-9][0-9]*)[.](?:0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?$")
 
 FORBIDDEN_SUFFIXES = {

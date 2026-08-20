@@ -20,7 +20,7 @@ available when the operating system does not provide a timezone database.
 ## Source and development installation
 
 ```bash
-git clone https://github.com/cabo0m/mapi-agent-memory.git
+git clone https://github.com/cabo0m/mapi-unified.git
 cd mapi-agent-memory
 python -m venv .venv
 ```

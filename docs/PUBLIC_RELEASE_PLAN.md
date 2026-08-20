@@ -5,7 +5,7 @@
 - Branch: `main`
 - Starting HEAD: `25394f59788e2a068e97607172c7eb482ef5d310`
 - Upstream: `origin/main`
-- Canonical remote: `https://github.com/cabo0m/mapi-agent-memory.git`
+- Canonical remote: `https://github.com/cabo0m/mapi-unified.git`
 - Starting worktree: clean; local `main` matched `origin/main`.
 - Initial `git diff --check`: passed.
 

@@ -2,7 +2,7 @@
 
 Status: **PUBLISHED — TECHNICAL AND LICENSING GATES PASSED**
 
-Public repository: **https://github.com/cabo0m/mapi-agent-memory**
+Public repository: **https://github.com/cabo0m/mapi-unified**
 
 | Field | Result |
 |---|---|
@@ -45,7 +45,7 @@ The audit recognizes two explicit repository states:
 
 - `release_candidate`: no remotes;
 - `published`: exactly one `origin` resolving to
-  `https://github.com/cabo0m/mapi-agent-memory.git` or its canonical SSH form.
+  `https://github.com/cabo0m/mapi-unified.git` or its canonical SSH form.
 
 Arbitrary owners, repositories, protocols, credentials, query strings,
 fragments, extra remotes, extra push URLs, and target-changing `insteadOf`

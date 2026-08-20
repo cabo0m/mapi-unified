@@ -5,7 +5,7 @@ This neutral package can be adapted for MCP catalogues, GitHub awesome lists, op
 ## Core fields
 
 - Name: **MAPI**
-- Repository: `https://github.com/cabo0m/mapi-agent-memory`
+- Repository: `https://github.com/cabo0m/mapi-unified`
 - Category: **Memory & Knowledge**
 - Runtime: **Python**
 - Transport: **HTTP MCP**

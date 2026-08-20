@@ -56,7 +56,7 @@ ChatGPT web cannot connect directly to localhost: it requires a remote HTTPS end
 Python 3.11 or 3.12 is required.
 
 ```bash
-git clone https://github.com/cabo0m/mapi-agent-memory.git
+git clone https://github.com/cabo0m/mapi-unified.git
 cd mapi-agent-memory
 python -m venv .venv
 ```

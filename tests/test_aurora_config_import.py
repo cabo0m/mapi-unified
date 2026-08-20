@@ -4,63 +4,64 @@ import json
 from pathlib import Path
 
 from mapi.aurora_config_import import apply_aurora_config_import, preview_aurora_config_import
+from mapi.env import parse_environment_file
 from mapi.initialize import render_env
 from mapi.legacy_aurora_runtime_config import default_config_document
 
 
 def _legacy_config(path: Path, project: Path) -> None:
     document = default_config_document()
+    root = str(project)
     document["database_path"] = "legacy-data/aurora.db"
     document["runtime"]["host"] = "0.0.0.0"
     document["runtime"]["port"] = 9999
     document["files"] = {
         "enabled": True,
-        "roots": [{"id": "proj", "name": "Project", "path": str(project)}],
-        "write_enabled": True,
-        "write_roots": ["proj"],
-        "project_roots": {"alpha": ["proj"]},
-        "project_write_roots": {"alpha": ["proj"]},
+        "roots": [root],
         "max_read_bytes": 123456,
+        "write_enabled": True,
+        "write_roots": [root],
         "max_write_bytes": 65432,
+        "project_roots": {"alpha": [root]},
+        "project_write_roots": {"alpha": [root]},
     }
     document["git"] = {
         "enabled": True,
-        "repositories": [{"id": "repo", "name": "Repo", "path": str(project)}],
+        "repositories": [root],
         "max_output_bytes": 120000,
         "timeout_seconds": 7,
         "commit_enabled": True,
-        "commit_repositories": ["repo"],
-        "project_repositories": {"alpha": ["repo"]},
-        "project_commit_repositories": {"alpha": ["repo"]},
-        "max_commit_message_chars": 180,
+        "commit_repositories": [root],
         "stage_enabled": True,
-        "stage_repositories": ["repo"],
-        "project_stage_repositories": {"alpha": ["repo"]},
+        "stage_repositories": [root],
         "stage_max_file_bytes": 222222,
+        "max_commit_message_chars": 180,
+        "project_repositories": {"alpha": [root]},
+        "project_commit_repositories": {"alpha": [root]},
+        "project_stage_repositories": {"alpha": [root]},
     }
     document["commands"] = {
         "enabled": True,
         "max_output_bytes": 100000,
         "default_timeout_seconds": 20,
-        "env_allowlist": ["CI"],
-        "recipes": [
-            {
-                "id": "tests",
-                "project_key": "alpha",
-                "name": "Tests",
-                "purpose": "Run fixed tests",
-                "argv": ["python", "-c", "print('ok')"],
-                "workdir": str(project),
-                "timeout_seconds": 15,
-                "env": {},
-            }
-        ],
+        "recipes": {
+            "alpha": [
+                {
+                    "name": "Tests",
+                    "purpose": "Run fixed tests",
+                    "argv": ["python", "-c", "print('ok')"],
+                    "workdir": root,
+                    "timeout_seconds": 15,
+                    "env_allowlist": ["CI"],
+                }
+            ]
+        },
     }
     document["admin"] = {
         "enabled": True,
-        "roots": [str(project)],
-        "sql_write_enabled": True,
+        "roots": [root],
         "shell_enabled": True,
+        "sql_write_enabled": True,
         "git_push_enabled": True,
         "default_timeout_seconds": 30,
         "max_output_bytes": 100000,
@@ -113,9 +114,10 @@ def test_preview_and_apply_import_only_project_capabilities(tmp_path: Path) -> N
     assert "MAPI_RUNTIME_HOST=127.0.0.1" in written
     assert "MAPI_RUNTIME_PORT=8015" in written
     assert "MAPI_DISTRIBUTION_NAME=Aurora" in written
-    assert "MAPI_FILES_ENABLED=1" in written
-    assert "MAPI_GIT_ENABLED=1" in written
-    assert "MAPI_COMMANDS_ENABLED=1" in written
+    parsed = parse_environment_file(target)
+    assert parsed["MAPI_FILES_ENABLED"].casefold() in {"1", "true", "yes", "on"}
+    assert parsed["MAPI_GIT_ENABLED"].casefold() in {"1", "true", "yes", "on"}
+    assert parsed["MAPI_COMMANDS_ENABLED"].casefold() in {"1", "true", "yes", "on"}
     assert "MAPI_ADMIN_" not in written
     assert "0.0.0.0" not in written
     assert "9999" not in written
@@ -150,7 +152,7 @@ def test_conflict_blocks_unless_replace_is_explicit(tmp_path: Path) -> None:
         replace_existing_capabilities=True,
     )
     assert result["status"] == "completed"
-    assert "MAPI_FILES_ENABLED=1" in target.read_text(encoding="utf-8")
+    assert parse_environment_file(target)["MAPI_FILES_ENABLED"].casefold() in {"1", "true", "yes", "on"}
 
 
 def test_preview_does_not_mutate_source_or_target(tmp_path: Path) -> None:
