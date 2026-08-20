@@ -1,6 +1,6 @@
 {
   "schema": "mapi_public_file_manifest.v1",
-  "source_commit": "d80d84e14fdf828943ed540291d70bac7e035ce2",
+  "source_commit": "d214c31fb01e442872b0bc488c40748c7818ef77",
   "files": [
     ".env.example",
     ".github/ISSUE_TEMPLATE/bug_report.yml",
