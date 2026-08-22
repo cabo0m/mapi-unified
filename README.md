@@ -53,73 +53,67 @@ ChatGPT web cannot connect directly to localhost: it requires a remote HTTPS end
 
 ## Install and run
 
-Python 3.11 or 3.12 is required.
+Python 3.11 or 3.12 is required. The complete step-by-step guide is in [Installation](docs/INSTALLATION.md).
+
+Choose the deployment that matches the client:
+
+- **Windows local (Aurora):** MAPI and Codex/another MCP client run on the same Windows machine.
+- **Linux local:** MAPI and Codex/another MCP client run on the same Linux machine.
+- **Linux/VPS remote (Polaris):** MAPI runs behind HTTPS with built-in OAuth. Use this path for ChatGPT web.
+
+Do not expose port `8015` directly to the Internet.
+
+### Windows local quickstart
+
+```powershell
+git clone https://github.com/cabo0m/mapi-unified.git
+cd mapi-unified
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -e .
+.\.venv\Scripts\mapi.exe init --mode local
+.\.venv\Scripts\mapi.exe doctor
+.\.venv\Scripts\mapi.exe start
+```
+
+The local MCP endpoint is `http://127.0.0.1:8015/mcp/`. Keep the server terminal open and run the protocol smoke from a second terminal:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\smoke_mcp.py
+```
+
+### Linux local quickstart
 
 ```bash
 git clone https://github.com/cabo0m/mapi-unified.git
-cd mapi-agent-memory
-python -m venv .venv
-```
-
-Windows PowerShell from a source checkout:
-
-```powershell
-.venv\Scripts\Activate.ps1
+cd mapi-unified
+python3 -m venv .venv
+source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install -e .
-mapi init
+python -m pip install -e .
+mapi init --mode local
+mapi doctor
 mapi start
 ```
 
-The unified Windows release bundle can instead be installed with `install-windows.ps1`. It creates a private venv under `%LOCALAPPDATA%\MAPI`, uses the same `~/.mapi-agent-memory` instance layout as Linux, registers safe nightly maintenance through Windows Task Scheduler, and preserves instance data during a normal uninstall. The legacy `mapi-init`, `mapi-server`, `mapi-doctor` and other direct entry points remain supported for scripts and compatibility.
-
-Linux:
+Then, from a second terminal in the checkout:
 
 ```bash
 source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -e .
-mapi-init
-mapi-server
-```
-
-`mapi-init` is the canonical first-run bootstrap. By default it creates a private instance under `~/.mapi-agent-memory`, writes a protected `.env`, creates the SQLite database and directories, applies all migrations, creates and verifies the first SQLite backup, runs final doctor checks and emits a fingerprinted init manifest. Local mode may seed the explicitly configured Agent Self Model identity. `vps-remote-auth` seeds only the self-namespace guardrail: the human-facing assistant name is deliberately left unset until the user chooses it during first-run Polaris onboarding. The initializer does **not** seed the product demo and does not perform privileged system changes unless service installation is explicitly accepted/requested.
-
-For a VPS, run the wizard and choose `vps-proxy` or `vps-remote-auth`, or use flags such as:
-
-```bash
-mapi-init --mode vps-proxy --public-url https://mapi.example.com --service-name polaris
-```
-
-The VPS modes keep MAPI bound to `127.0.0.1` and generate the runtime systemd unit, a paired nightly memory-maintenance service/timer, and a reverse-proxy security template. In `vps-remote-auth`, first-run also configures the single built-in owner login used by the OAuth authorization flow. After the first ChatGPT connection, Polaris exposes a guided onboarding one question at a time: the user names the assistant, provides their preferred name and work context, chooses how proactive the assistant should be and how memory should behave, optionally defines memory exclusions, and may create a first project. Answers remain draft onboarding state until a final summary is reviewed and confirmed; corrections can be applied before the profile is committed to durable memory. `--service-name` selects an isolated systemd unit such as `polaris.service` and corresponding `polaris-maintenance.service` / `polaris-maintenance.timer`. On an interactive Linux VPS, `mapi-init` offers to install and start the generated services immediately; in automation use `--install-service` explicitly. The maintenance timer runs locally on the customer's VPS and does not require vendor credentials or later SSH access. It creates verified SQLite backups before mutation, automatically applies only deterministic metadata and unambiguous structural repairs, never deletes memory content, and queues semantically ambiguous lineage repairs for the connected assistant model. If the model cannot safely resolve the ambiguity without changing meaning, Polaris asks the user for concise consent and preserves the losing version as history. Healthy maintenance runs remain invisible to the user. The installer waits for the local listener, probes the endpoint, and only then runs the final doctor report so the result describes the finished installation. `mapi-init --resume` reuses the verified first backup and refuses identity/runtime reconfiguration.
-
-At the end, the installer prints the exact connection address, for example:
-
-```text
-MAPI MCP address: https://mapi.example.com/mcp/
-Local loopback: http://127.0.0.1:8015/mcp/
-Endpoint status: public_endpoint_reachable
-```
-
-The same address is printed every time `mapi-server` starts. If the authenticated TLS reverse proxy is not ready yet, the address is still reported but the status remains `configured` or `local_listener_ready` instead of claiming public reachability.
-
-Operational commands load the generated instance automatically from the default root. For a custom root, pass the same path explicitly, for example `mapi-doctor --root <instance-root>`, `mapi-server --root <instance-root>` or `mapi-recover --root <instance-root>`. `mapi-doctor` is the canonical health report; `mapi-recover` is preview-first unless `--execute` is explicitly requested.
-
-The verified local endpoint is:
-
-```text
-http://127.0.0.1:8015/mcp/
-```
-
-The first-run bootstrap performs no external model calls and downloads no model. After starting MAPI, verify the protocol from the source checkout:
-
-```bash
 python scripts/smoke_mcp.py
 ```
 
-The smoke uses the safe `agent` profile, writes a fictional record, searches and reads it, checks links and timeline access, and confirms that admin is denied.
+### Linux/VPS remote quickstart
 
-Agent Self Model includes deterministic snapshot deltas and a controlled source-bound self narrative. Optional Gemini planning can select only known claim IDs; it cannot write the narrative or invent source IDs.
+For ChatGPT web or another remote MCP client, install the same Linux checkout and initialize the built-in single-owner OAuth mode:
+
+```bash
+mapi init --mode vps-remote-auth --public-url https://mapi.example.com --service-name polaris
+```
+
+Keep MAPI on loopback, point DNS at the VPS and terminate TLS in a reverse proxy that forwards to `127.0.0.1:8015`. The initializer generates a reverse-proxy template and can install the runtime plus nightly maintenance as systemd services. See [Installation](docs/INSTALLATION.md#linuxvps-remote-installation-for-chatgpt-web) for the full sequence.
+
+The modern CLI is `mapi init`, `mapi start`, `mapi doctor`, `mapi migrate` and `mapi recover`. Legacy direct entry points such as `mapi-init`, `mapi-server`, `mapi-doctor` and `mapi-recover` remain available for compatibility.
 
 ## Run the product demo
 
@@ -153,32 +147,34 @@ python scripts/smoke_mcp_lifecycle.py
 
 ## Connect an MCP client
 
-### Codex
+See [MCP integration](docs/MCP_INTEGRATION.md) for the full Windows/Linux and local/remote matrix.
 
-Start MAPI, then add this Streamable HTTP server to `~/.codex/config.toml` or a
-trusted project's `.codex/config.toml`:
+### Windows or Linux: local Codex
+
+Start MAPI locally, then add this Streamable HTTP server to the Codex configuration used by your installation:
 
 ```toml
 [mcp_servers.mapi]
 url = "http://127.0.0.1:8015/mcp/"
 ```
 
-Reload Codex, confirm the server with `codex mcp list` or `/mcp`, call
-`bootstrap_agent_context` for the project and search with `find_memories` before
-writing. See the [verified integration sequence](docs/MCP_INTEGRATION.md#codex).
+On Windows the user-level file is normally `%USERPROFILE%\.codex\config.toml`; on Linux it is `~/.codex/config.toml`.
 
-### ChatGPT desktop
+Reload Codex, confirm the server with `codex mcp list` or `/mcp`, call `bootstrap_agent_context` for the project and search with `find_memories` before writing.
 
-Current ChatGPT desktop builds with MCP server settings can add a Streamable HTTP URL
-under **Settings -> MCP servers** and require a restart after saving. Availability can
-still depend on the distributed application version and workspace controls; support is
-not promised for every plan or managed workspace.
+### ChatGPT web: remote Linux/VPS MAPI
 
-### ChatGPT web
+ChatGPT does not directly connect to a localhost MCP server. Use a remotely reachable HTTPS MAPI endpoint initialized with `vps-remote-auth`, for example:
 
-The web application cannot reach `127.0.0.1` on your computer. Use `mapi-init --mode vps-remote-auth` for the supported single-owner remote deployment. Polaris/MAPI acts as the OAuth authorization server, exposes Dynamic Client Registration for ChatGPT, shows the owner login directly at `/authorize`, and maps that one authenticated owner to the `admin` profile and full workshop surface. In the normal ChatGPT path the customer supplies only the MCP URL and their Polaris login; Client ID and callback are registered automatically. On a fresh instance, the first bootstrap then starts guided onboarding and lets the customer choose the assistant's personal name; Polaris remains the product/runtime name. The reverse proxy terminates TLS and forwards traffic only; do not add Basic Auth or a second identity gateway. Use `vps-proxy` only when an external authenticated proxy is deliberately supplying the security boundary instead of built-in OAuth.
+```text
+https://mapi.example.com/mcp/
+```
 
-### Generic MCP client
+MAPI provides the single-owner OAuth authorization flow, PKCE, Dynamic Client Registration and refresh-token support. The reverse proxy terminates TLS and forwards to loopback only; do not add Basic Auth or expose port `8015` publicly.
+
+OpenAI's plan and developer-mode availability can change. The current integration steps and plan limitations are maintained in [MCP integration](docs/MCP_INTEGRATION.md#linuxvps-connect-chatgpt-web-to-remote-mapi).
+
+### Generic local MCP client
 
 ```json
 {
@@ -191,7 +187,7 @@ The web application cannot reach `127.0.0.1` on your computer. Use `mapi-init --
 }
 ```
 
-The endpoint and HTTP MCP transport are covered by the protocol smoke. Client-specific configuration keys may differ.
+Client-specific field names may differ; the verified protocol contract is Streamable HTTP MCP at the configured URL.
 
 ## Recommended memory workflow
 
@@ -232,8 +228,9 @@ The thin entry point is [`server.py`](server.py). Runtime composition lives in `
 - [Comparison](docs/COMPARISON.md)
 - [Known limitations](docs/KNOWN_LIMITATIONS.md)
 - [Directory submission package](docs/PUBLIC_DIRECTORY_SUBMISSIONS.md)
-- [RC2 draft release notes](docs/RELEASE_NOTES_0.1.0_RC2.md)
-- [Public release audit](docs/PUBLIC_RELEASE_AUDIT.md)
+- [Changelog](CHANGELOG.md)
+- [Historical 0.1.0 RC2 notes](docs/RELEASE_NOTES_0.1.0_RC2.md)
+- [Historical public release audit](docs/PUBLIC_RELEASE_AUDIT.md)
 
 ## Development and release gates
 

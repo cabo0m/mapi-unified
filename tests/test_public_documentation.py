@@ -81,6 +81,30 @@ def test_readme_quickstart_matches_console_entry_points() -> None:
     assert "pip install -e ." in readme
 
 
+def test_installation_and_mcp_docs_are_unified_and_platform_specific() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    installation = (ROOT / "docs" / "INSTALLATION.md").read_text(encoding="utf-8")
+    integration = (ROOT / "docs" / "MCP_INTEGRATION.md").read_text(encoding="utf-8")
+    historical_release = (ROOT / "docs" / "RELEASE_NOTES_0.1.0_RC2.md").read_text(encoding="utf-8")
+
+    for current_doc in (readme, installation, integration):
+        assert "cd mapi-agent-memory" not in current_doc
+        assert "github.com/cabo0m/mapi-agent-memory" not in current_doc
+
+    assert "cd mapi-unified" in readme
+    assert "cd mapi-unified" in installation
+    assert "## Windows: local installation step by step" in installation
+    assert "## Linux: local installation step by step" in installation
+    assert "## Linux/VPS: remote installation for ChatGPT web" in installation
+    assert "## Windows: connect a local MCP client" in integration
+    assert "## Linux: connect a local MCP client" in integration
+    assert "## Linux/VPS: connect ChatGPT web to remote MAPI" in integration
+    assert "ChatGPT does not directly connect to a localhost MCP server" in integration
+    assert "http://127.0.0.1:8015/mcp/" in integration
+    assert "vps-remote-auth" in integration
+    assert "Archive only" in historical_release
+
+
 def test_all_local_markdown_links_exist() -> None:
     failures: list[str] = []
     for document in _markdown_files():

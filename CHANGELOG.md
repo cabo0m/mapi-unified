@@ -2,6 +2,7 @@
 
 ## 0.3.0a1 - 2026-08-20
 
+- Rewrite installation and MCP handoff documentation with separate Windows local, Linux local and Linux/VPS remote paths; fix the Unified checkout name and current ChatGPT remote-MCP guidance.
 - Start the Unified MAPI line: one platform-neutral `mapi_core` shared by Aurora (Windows) and Polaris (Linux/VPS).
 - Add shared project Files, guarded writes, Git stage/commit/rollback and fixed command recipes.
 - Add Windows Task Scheduler/install bundle and Linux systemd adapters around the same runtime and SQLite schema.

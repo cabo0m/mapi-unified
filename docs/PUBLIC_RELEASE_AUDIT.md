@@ -1,5 +1,7 @@
 # Public release audit
 
+> Historical audit of the pre-Unified public release line. It remains as release evidence, but its source commit, file count and dated environment results are not the current Unified MAPI installation state. Use `UNIFIED_PARITY_AUDIT_2026-08-20.md`, the current CI and `CHANGELOG.md` for the Unified line.
+
 Status: **PUBLISHED — TECHNICAL AND LICENSING GATES PASSED**
 
 Public repository: **https://github.com/cabo0m/mapi-unified**

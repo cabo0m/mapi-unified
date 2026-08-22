@@ -1,5 +1,7 @@
 # Public release plan
 
+> Historical planning document for the pre-Unified 0.1.x release work. It is not current installation or MCP connection guidance. Use `INSTALLATION.md` and `MCP_INTEGRATION.md` for the Unified line.
+
 ## Baseline
 
 - Branch: `main`
@@ -21,8 +23,7 @@ as a standalone product workflow.
 
 - `docs/KNOWN_LIMITATIONS.md` says the license is unresolved although the repository has
   an Apache License 2.0 file and the public audit validates it.
-- The generic MCP configuration is documented, but named Codex, ChatGPT desktop and
-  ChatGPT web guidance is absent.
+- The generic MCP configuration was documented, but named Codex and ChatGPT client guidance was absent at that time.
 - The quickstart omits clone and checkout commands.
 - The seed contains a supersession example, but there is no human-readable, isolated demo
   that fails when current-state resolution is wrong.
