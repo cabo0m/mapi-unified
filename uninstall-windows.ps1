@@ -3,7 +3,8 @@ param(
     [string]$InstallDir = "",
     [string]$InstanceRoot = "",
     [switch]$RemoveInstance,
-    [string]$MaintenanceTaskName = "MAPI Aurora Memory Maintenance"
+    [string]$MaintenanceTaskName = "MAPI Aurora Memory Maintenance",
+    [string]$TunnelTaskName = "MAPI Aurora"
 )
 
 Set-StrictMode -Version Latest
@@ -25,7 +26,9 @@ if ($null -ne $schtasks) {
     $previous = $ErrorActionPreference
     try {
         $ErrorActionPreference = "SilentlyContinue"
-        & $schtasks.Source /Delete /F /TN $MaintenanceTaskName *> $null
+        foreach ($taskName in @($MaintenanceTaskName, $TunnelTaskName)) {
+            & $schtasks.Source /Delete /F /TN $taskName *> $null
+        }
     } finally {
         $ErrorActionPreference = $previous
     }

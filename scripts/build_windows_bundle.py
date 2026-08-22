@@ -42,6 +42,11 @@ def main() -> int:
         shutil.copy2(wheel, bundle_root / wheel.name)
         for name in ("install-windows.ps1", "uninstall-windows.ps1", "LICENSE", "README.md"):
             shutil.copy2(ROOT / name, bundle_root / name)
+        for name in (
+            "configure_windows_tunnel_autostart.ps1",
+            "run_windows_tunnel_autostart.ps1",
+        ):
+            shutil.copy2(ROOT / "scripts" / name, bundle_root / name)
         (bundle_root / "SHA256SUMS.txt").write_text("\n".join(checksum_lines) + "\n", encoding="utf-8")
         version = wheel.name.removeprefix("mapi_agent_memory-").split("-", 1)[0]
         zip_path = output / f"MAPI-Windows-{version}.zip"

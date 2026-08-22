@@ -145,6 +145,14 @@ if (Test-Path -LiteralPath $UninstallerSource -PathType Leaf) {
     Copy-Item -LiteralPath $UninstallerSource -Destination (Join-Path $InstallDir "uninstall-windows.ps1") -Force
 }
 
+$TunnelConfigureSource = Join-Path $PSScriptRoot "configure_windows_tunnel_autostart.ps1"
+$TunnelRunnerSource = Join-Path $PSScriptRoot "run_windows_tunnel_autostart.ps1"
+foreach ($source in @($TunnelConfigureSource, $TunnelRunnerSource)) {
+    if (Test-Path -LiteralPath $source -PathType Leaf) {
+        Copy-Item -LiteralPath $source -Destination (Join-Path $InstallDir ([IO.Path]::GetFileName($source))) -Force
+    }
+}
+
 $EnvFile = Join-Path $InstanceRoot ".env"
 if (-not (Test-Path -LiteralPath $EnvFile -PathType Leaf)) {
     & $InitExe --root $InstanceRoot --mode local --owner-key owner --agent-subject-key agent --agent-name Agent --agent-project-key agent-self --profile agent --non-interactive --no-verify-endpoint

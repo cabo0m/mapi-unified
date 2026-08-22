@@ -6,9 +6,10 @@ MAPI exposes Streamable HTTP MCP. The correct connection path depends on where t
 |---|---|---|---|
 | Codex or another MCP client on Windows | same Windows machine | `http://127.0.0.1:8015/mcp/` | local |
 | Codex or another MCP client on Linux | same Linux machine | `http://127.0.0.1:8015/mcp/` | local |
+| ChatGPT web | same Windows machine through Secure MCP Tunnel | private `http://127.0.0.1:8015/mcp/` behind the tunnel | local private tunnel |
 | ChatGPT web | Linux/VPS or another remotely reachable host | `https://<your-host>/mcp/` | remote HTTPS + OAuth |
 
-ChatGPT does not directly connect to a localhost MCP server. Do not expose `127.0.0.1:8015` by rebinding it to the public network. Use the supported `vps-remote-auth` deployment or another explicitly secured remote path.
+ChatGPT does not directly connect to a localhost MCP server. On Windows, OpenAI Secure MCP Tunnel provides the supported private path without exposing port `8015`. On a VPS, use `vps-remote-auth` behind HTTPS. Never rebind the local listener to the public network.
 
 The MAPI protocol smoke test is:
 
@@ -70,6 +71,30 @@ Clients that accept JSON-style MCP configuration commonly use a shape like:
 ```
 
 Client-specific field names may differ. The interoperable contract is the HTTP MCP endpoint URL.
+
+## Windows: connect ChatGPT once through Secure MCP Tunnel
+
+Complete the Windows installation and confirm that
+`http://127.0.0.1:8015/mcp/` works locally. Then:
+
+1. create a tunnel in OpenAI Platform and associate it with the intended
+   ChatGPT workspace;
+2. create a runtime API key for `tunnel-client`;
+3. download the official Windows AMD64
+   `tunnel-client-runtime-cloudflared` bundle;
+4. run `scripts/configure_windows_tunnel_autostart.ps1` once;
+5. in ChatGPT developer mode, create the MAPI connection with
+   **Connection = Tunnel**, select the tunnel, and choose no MCP-side OAuth for
+   a local no-auth MAPI instance.
+
+The configurator registers a per-user Windows logon task. On every later sign-in
+it starts Aurora, waits for port `8015`, starts the tunnel client, and supervises
+both processes. The ChatGPT connection is persistent: the user does not repeat
+these steps after reboot.
+
+The runtime API key is not written to the task command, JSON configuration,
+repository or plaintext environment file. It is stored with Windows DPAPI and
+decrypted only inside the current user's background task.
 
 ## Linux: connect a local MCP client
 

@@ -133,11 +133,54 @@ Open a second PowerShell window in the `mapi-unified` checkout and run:
 
 The smoke test uses fictional data and verifies initialization, tool discovery, safe write/read flow, links, timeline access and admin denial under the safe agent profile.
 
+### 8. Configure permanent ChatGPT tunnel autostart
+
+After the Secure MCP Tunnel has connected successfully once, register Aurora and
+the tunnel as one Windows logon task. Download and extract the current official
+Windows AMD64 `tunnel-client-runtime-cloudflared` release, create the tunnel in
+OpenAI Platform, and keep the resulting `tunnel_id`.
+
+Run this once from the repository checkout:
+
+```powershell
+.\scripts\configure_windows_tunnel_autostart.ps1 `
+  -TunnelId "tunnel_REPLACE_WITH_YOUR_ID" `
+  -TunnelClientPath "$env:USERPROFILE\Downloads\tunnel-client-runtime-cloudflared-v0.0.12-windows-amd64\tunnel-client-runtime-cloudflared.exe"
+```
+
+The configurator asks for the OpenAI runtime API key using a hidden secure
+prompt. It copies the tunnel runtime into `%LOCALAPPDATA%\MAPI\tunnel`,
+protects the key with Windows DPAPI for the current Windows user, and registers
+the `MAPI Aurora` Task Scheduler task. It starts the task immediately.
+
+After this one-time step:
+
+- Aurora starts automatically after Windows sign-in;
+- the tunnel starts only after the local MCP port is reachable;
+- both processes are restarted if they stop;
+- the ChatGPT connection remains saved and does not need to be recreated;
+- no PowerShell window needs to remain open.
+
+Do not delete the Windows account that configured the task: DPAPI intentionally
+binds the stored runtime key to that account. To rotate the key or change the
+tunnel, run the configurator again with the new values.
+
 ### Optional Windows release-bundle installer
 
 `install-windows.ps1` is intended for a release bundle that contains a built wheel and checksum file. A plain source clone does not contain that wheel. Do not run the bundle installer from a source clone unless you explicitly provide a built wheel with `-WheelPath` and understand the checksum option.
 
 For development and evaluation, use the source-install steps above.
+
+A Windows release bundle also installs the one-time tunnel configurator. After
+the bundle installer finishes, run:
+
+```powershell
+& "$env:LOCALAPPDATA\MAPI\configure_windows_tunnel_autostart.ps1" `
+  -TunnelId "tunnel_REPLACE_WITH_YOUR_ID" `
+  -TunnelClientPath "<path-to-extracted-tunnel-client-runtime-cloudflared.exe>"
+```
+
+After that command succeeds, Aurora and the tunnel are managed automatically.
 
 ## Linux: local installation step by step
 
