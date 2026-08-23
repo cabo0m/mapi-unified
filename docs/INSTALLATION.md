@@ -2,7 +2,7 @@
 
 MAPI supports two local installations and one remote deployment path:
 
-- **Windows local (Aurora):** MAPI and the MCP client run on the same Windows machine.
+- **Windows local (Aurora):** MAPI stays on the Windows machine. Local MCP clients connect directly; ChatGPT can use OpenAI Secure MCP Tunnel (preferred) or an authenticated ngrok HTTPS endpoint (fallback).
 - **Linux local:** MAPI and the MCP client run on the same Linux machine.
 - **Linux/VPS remote (Polaris):** MAPI runs on a Linux server behind HTTPS and its built-in OAuth owner login. Use this path for ChatGPT web.
 
@@ -181,6 +181,59 @@ the bundle installer finishes, run:
 ```
 
 After that command succeeds, Aurora and the tunnel are managed automatically.
+
+### Alternative Windows path: ngrok + Aurora OAuth
+
+Use this fallback when the client expects a normal public HTTPS MCP URL instead of an OpenAI Tunnel connection. OpenAI Secure MCP Tunnel remains the preferred ChatGPT path because it keeps Aurora off the public Internet and unified already manages its Windows autostart.
+
+For ngrok, use a **stable HTTPS domain** assigned to your ngrok account. Do not configure Aurora OAuth around a URL that changes between sessions. The public origin configured in MAPI must be the same origin that ChatGPT will use.
+
+If Aurora was already initialized locally, resume the same instance and enable the existing single-owner remote-auth boundary:
+
+```powershell
+.\.venv\Scripts\mapi.exe init `
+  --root "$env:USERPROFILE\.mapi-agent-memory" `
+  --mode vps-remote-auth `
+  --public-url https://YOUR-STABLE-DOMAIN.ngrok.app `
+  --profile admin `
+  --resume `
+  --no-install-service `
+  --no-verify-endpoint
+```
+
+The `vps-remote-auth` name is historical; the OAuth runtime itself is shared and works with the Windows listener. `--no-install-service` is required here because Windows does not use the generated systemd service. The interactive command asks for the owner login/password when they are not already configured. MAPI stores only the salted password verifier.
+
+Start Aurora on loopback:
+
+```powershell
+.\.venv\Scripts\mapi.exe start
+```
+
+Install ngrok using the current official Windows instructions, authenticate the agent, then publish only the loopback MCP port through the stable domain:
+
+```powershell
+ngrok config add-authtoken "<YOUR_NGROK_AUTHTOKEN>"
+ngrok http 8015 --url https://YOUR-STABLE-DOMAIN.ngrok.app
+```
+
+Do **not** bind MAPI itself to `0.0.0.0`. ngrok provides the public TLS edge while Aurora remains on `127.0.0.1:8015`. Confirm the MAPI side before creating the ChatGPT app:
+
+```powershell
+.\.venv\Scripts\mapi.exe doctor
+.\.venv\Scripts\mapi.exe remote status
+```
+
+In ChatGPT developer mode, create the custom MCP app with:
+
+```text
+https://YOUR-STABLE-DOMAIN.ngrok.app/mcp/
+```
+
+Choose OAuth and scan the tools. Aurora supports Dynamic Client Registration for the ChatGPT callback flow, so the normal path does not require manually inventing a Client ID or callback URL.
+
+For reboot persistence, ngrok can run as a Windows service using its own current service configuration. Aurora still needs its own Windows startup process. If one-click persistence is the priority, prefer the OpenAI Tunnel path above because `configure_windows_tunnel_autostart.ps1` supervises both Aurora and the tunnel in one task.
+
+Current ngrok Windows documentation: <https://ngrok.com/download/windows>.
 
 ## Linux: local installation step by step
 

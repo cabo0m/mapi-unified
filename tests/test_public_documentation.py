@@ -102,6 +102,9 @@ def test_installation_and_mcp_docs_are_unified_and_platform_specific() -> None:
     assert "ChatGPT does not directly connect to a localhost MCP server" in integration
     assert "http://127.0.0.1:8015/mcp/" in integration
     assert "vps-remote-auth" in integration
+    assert "Secure MCP Tunnel" in integration
+    assert "ngrok" in integration
+    assert "stable-ngrok-domain" in integration
     assert "Archive only" in historical_release
 
 

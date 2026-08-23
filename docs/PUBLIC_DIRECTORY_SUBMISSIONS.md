@@ -33,7 +33,7 @@ MAPI is a self-hosted MCP memory server for project decisions, corrections, rule
 - self-hosted and local-first; no hosted SaaS;
 - Python 3.11 or 3.12;
 - SQLite single-writer characteristics;
-- ChatGPT web requires a separately secured remote HTTPS deployment;
+- ChatGPT web can reach Windows Aurora through OpenAI Secure MCP Tunnel, or through a separately secured HTTPS endpoint such as authenticated ngrok; VPS deployments use remote HTTPS + Aurora OAuth;
 - remote authentication is experimental and outside the quickstart;
 - Docker and macOS are not verified in this candidate.
 

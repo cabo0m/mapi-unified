@@ -6,10 +6,11 @@ MAPI exposes Streamable HTTP MCP. The correct connection path depends on where t
 |---|---|---|---|
 | Codex or another MCP client on Windows | same Windows machine | `http://127.0.0.1:8015/mcp/` | local |
 | Codex or another MCP client on Linux | same Linux machine | `http://127.0.0.1:8015/mcp/` | local |
-| ChatGPT web | same Windows machine through Secure MCP Tunnel | private `http://127.0.0.1:8015/mcp/` behind the tunnel | local private tunnel |
+| ChatGPT web | same Windows machine through Secure MCP Tunnel | private `http://127.0.0.1:8015/mcp/` behind the tunnel | local private tunnel, preferred |
+| ChatGPT web | Windows Aurora through authenticated ngrok | `https://<stable-ngrok-domain>/mcp/` | public HTTPS + Aurora OAuth, fallback |
 | ChatGPT web | Linux/VPS or another remotely reachable host | `https://<your-host>/mcp/` | remote HTTPS + OAuth |
 
-ChatGPT does not directly connect to a localhost MCP server. On Windows, OpenAI Secure MCP Tunnel provides the supported private path without exposing port `8015`. On a VPS, use `vps-remote-auth` behind HTTPS. Never rebind the local listener to the public network.
+ChatGPT does not directly connect to a localhost MCP server. On Windows, OpenAI Secure MCP Tunnel is the preferred private path without exposing port `8015`. An authenticated ngrok HTTPS endpoint is the fallback when a normal remote MCP URL is required. On a VPS, use `vps-remote-auth` behind HTTPS. Never rebind the local listener to the public network.
 
 The MAPI protocol smoke test is:
 
@@ -95,6 +96,20 @@ these steps after reboot.
 The runtime API key is not written to the task command, JSON configuration,
 repository or plaintext environment file. It is stored with Windows DPAPI and
 decrypted only inside the current user's background task.
+
+## Windows fallback: connect ChatGPT through ngrok + Aurora OAuth
+
+Use this only when you need a conventional public HTTPS MCP endpoint. The Secure MCP Tunnel path above is preferred for ChatGPT because it avoids publishing Aurora on the Internet and has a unified Windows supervisor.
+
+1. Configure Aurora remote auth for the same Windows instance using the `vps-remote-auth` compatibility mode with `--resume --profile admin --no-install-service` and a stable ngrok HTTPS origin. See [Installation](INSTALLATION.md), **Alternative Windows path: ngrok + Aurora OAuth**.
+2. Keep MAPI bound to `127.0.0.1:8015`.
+3. Start ngrok against port `8015` using the exact stable domain configured as `MAPI_REMOTE_BASE_URL`.
+4. Run `mapi doctor` and `mapi remote status`; remote auth must be valid before you expose the endpoint.
+5. In ChatGPT developer mode create the custom MCP app at `https://<stable-ngrok-domain>/mcp/`, choose OAuth, scan tools and complete the Aurora owner-login flow.
+
+Do not put a changing temporary ngrok URL into Aurora OAuth configuration. If the public origin changes, OAuth issuer/redirect discovery will no longer match the ChatGPT connection.
+
+ngrok is only the TLS/public transport. Do not add ngrok Basic Auth or another interactive login in front of Aurora OAuth, because that creates two competing authentication boundaries.
 
 ## Linux: connect a local MCP client
 
