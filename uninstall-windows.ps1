@@ -31,6 +31,10 @@ if ($null -ne $schtasks) {
         }
     } finally {
         $ErrorActionPreference = $previous
+        # schtasks returns 1 when an optional task does not exist. Task removal is
+        # intentionally best-effort, so do not leak that native exit code to the
+        # caller after an otherwise successful uninstall.
+        $global:LASTEXITCODE = 0
     }
 }
 

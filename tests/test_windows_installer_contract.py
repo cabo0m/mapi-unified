@@ -86,3 +86,4 @@ def test_windows_release_bundle_carries_tunnel_autostart() -> None:
         assert name in installer
     assert '$TunnelTaskName = "MAPI Aurora"' in uninstaller
     assert "@($MaintenanceTaskName, $TunnelTaskName)" in uninstaller
+    assert "$global:LASTEXITCODE = 0" in uninstaller
