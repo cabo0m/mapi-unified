@@ -14,6 +14,14 @@ The authoritative neutral template is [`.env.example`](../.env.example). `mapi-i
 | `MAPI_SYSTEMD_SERVICE_NAME` | `mapi.service` | no | Persisted VPS systemd unit name; choose a unique name on shared hosts |
 | `MCP_SURFACE_PROFILE` | `agent` | no | Higher profiles expose more mutations |
 | `MAPI_ADMIN_TOOLS_ENABLED` | `false` | no | Must be true before `admin` is effective |
+| `MAPI_FILES_ENABLED` | `false` | no | Enables guarded file browsing under configured roots |
+| `MAPI_FILE_ROOTS` | empty | when files enabled | Allowed read roots; use one parent workspace root where practical |
+| `MAPI_FILE_READ_MAX_BYTES` | `262144` | no | Per-file text read limit |
+| `MAPI_FILE_WRITE_ENABLED` | `false` | no | Separately enables guarded file writes |
+| `MAPI_FILE_WRITE_ROOTS` | empty | when writes enabled | Writable roots; must also be listed in read roots |
+| `MAPI_FILE_WRITE_MAX_BYTES` | `262144` | no | Per-file guarded write limit |
+| `MAPI_FILE_PROJECT_ROOTS_JSON` | `{}` | no | Optional project-to-root bindings; `*` means every project key |
+| `MAPI_FILE_PROJECT_WRITE_ROOTS_JSON` | `{}` | when writes enabled | Project-to-write-root bindings; `*` means every project key |
 | `MAPI_REMOTE_OWNER_LOGIN` | `owner` | vps-remote-auth | Login shown by the built-in OAuth owner page |
 | `MAPI_REMOTE_OWNER_PASSWORD_HASH` | generated PBKDF2 hash | vps-remote-auth | Password verifier only; never store the plaintext owner password |
 | `MAPI_OWNER_KEY` | `owner` | no | Single-instance identity namespace |
@@ -41,6 +49,56 @@ Every initialized instance has a deterministic MCP URL: `http://127.0.0.1:<port>
 `mapi-init` owns instance creation. Its generated file is private state and must not be committed. The default instance root is outside the source checkout. Local bootstrap may explicitly enable the admin surface with `--profile admin`. In `vps-remote-auth` mode the deployment is intentionally single-owner: the authenticated owner uses profile `admin`, `MAPI_ADMIN_TOOLS_ENABLED=true`, and there is no second remote login path. Resume never acts as an implicit configuration editor.
 
 The generated self-model records are operational evidence from the operator's explicit configuration: one identity record and one namespace-separation guardrail. They are not demo memories or inferred personality traits.
+
+## Project file access
+
+The simplest setup is to expose one parent workspace directory instead of registering every project directory separately. Edit the initialized instance environment file, normally `%USERPROFILE%\.mapi-agent-memory\.env` on Windows or `~/.mapi-agent-memory/.env` on Linux, then restart MAPI.
+
+For read-only access, two settings are enough.
+
+Windows:
+
+```dotenv
+MAPI_FILES_ENABLED=true
+MAPI_FILE_ROOTS=C:\Projects
+```
+
+Linux:
+
+```dotenv
+MAPI_FILES_ENABLED=true
+MAPI_FILE_ROOTS=/home/name/projects
+```
+
+Every child directory under that root is then available through the guarded file capability. Protected locations and secret-like files such as `.git`, `.ssh`, `.env`, private keys and credential files remain blocked even when their parent directory is allowed.
+
+For a trusted single-user instance that should also edit files, enable guarded writes and use the explicit wildcard project binding `*`. This means "all project keys in this MAPI instance" and avoids maintaining one JSON entry per project.
+
+Windows:
+
+```dotenv
+MAPI_FILES_ENABLED=true
+MAPI_FILE_ROOTS=C:\Projects
+MAPI_FILE_WRITE_ENABLED=true
+MAPI_FILE_WRITE_ROOTS=C:\Projects
+MAPI_FILE_PROJECT_ROOTS_JSON={"*":["C:/Projects"]}
+MAPI_FILE_PROJECT_WRITE_ROOTS_JSON={"*":["C:/Projects"]}
+```
+
+Linux:
+
+```dotenv
+MAPI_FILES_ENABLED=true
+MAPI_FILE_ROOTS=/home/name/projects
+MAPI_FILE_WRITE_ENABLED=true
+MAPI_FILE_WRITE_ROOTS=/home/name/projects
+MAPI_FILE_PROJECT_ROOTS_JSON={"*":["/home/name/projects"]}
+MAPI_FILE_PROJECT_WRITE_ROOTS_JSON={"*":["/home/name/projects"]}
+```
+
+Use forward slashes inside the JSON value on Windows to avoid backslash escaping. If more than one root is needed, separate `MAPI_FILE_ROOTS` and `MAPI_FILE_WRITE_ROOTS` entries with `;` on Windows or `:` on Linux. Exact project bindings can still be used instead of `*` when stronger project isolation is required.
+
+After restart, open the `files` workshop and run `list_file_roots` for a quick verification. File writes remain guarded by the existing preview/apply/audit/rollback contract; adding a root does not bypass protected-path checks.
 
 ## Remote authentication status
 

@@ -234,7 +234,7 @@ class FileCapabilityConfig:
                 read_map = dict(self.project_root_bindings)
                 write_map = dict(self.project_write_bindings)
                 for project, write_ids in write_map.items():
-                    read_ids = set(read_map.get(project, ()))
+                    read_ids = set(read_map.get("*", ())) | set(read_map.get(project, ()))
                     for root_id in write_ids:
                         if root_id not in read_ids:
                             errors.append(f"file_project_write_requires_read_binding:{project}:{root_id}")
@@ -252,9 +252,10 @@ class FileCapabilityConfig:
         if not mapping:
             return tuple(root.root_id for root in self.roots)
         project = str(project_key or "").strip()
-        if not project:
-            return ()
-        return mapping.get(project, ())
+        root_ids = list(mapping.get("*", ()))
+        if project:
+            root_ids.extend(mapping.get(project, ()))
+        return tuple(dict.fromkeys(root_ids))
 
     def root_bound_to_project(self, root_id: str, project_key: str | None) -> bool:
         return str(root_id) in set(self.root_ids_for_project(project_key))
@@ -262,9 +263,10 @@ class FileCapabilityConfig:
     def write_root_ids_for_project(self, project_key: str | None) -> tuple[str, ...]:
         mapping = dict(self.project_write_bindings)
         project = str(project_key or "").strip()
-        if not project:
-            return ()
-        return mapping.get(project, ())
+        root_ids = list(mapping.get("*", ()))
+        if project:
+            root_ids.extend(mapping.get(project, ()))
+        return tuple(dict.fromkeys(root_ids))
 
     def write_bound_to_project(self, root_id: str, project_key: str | None) -> bool:
         root = next((item for item in self.roots if item.root_id == str(root_id)), None)

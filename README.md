@@ -115,6 +115,12 @@ Keep MAPI on loopback, point DNS at the VPS and terminate TLS in a reverse proxy
 
 The modern CLI is `mapi init`, `mapi start`, `mapi doctor`, `mapi migrate` and `mapi recover`. Legacy direct entry points such as `mapi-init`, `mapi-server`, `mapi-doctor` and `mapi-recover` remain available for compatibility.
 
+## Optional: allow project-file access
+
+For the simplest personal/local setup, expose one parent workspace directory instead of adding each project separately. Edit the generated instance `.env` (`%USERPROFILE%\.mapi-agent-memory\.env` on Windows or `~/.mapi-agent-memory/.env` on Linux), enable `MAPI_FILES_ENABLED`, and set `MAPI_FILE_ROOTS` to that parent directory. Guarded writes can use the explicit `*` project binding so one root works for every project key in the instance.
+
+See [Configuration: Project file access](docs/CONFIGURATION.md#project-file-access) for copy-paste Windows/Linux examples and the write-safe setup. Protected secret paths remain blocked even inside an allowed root.
+
 ## Run the product demo
 
 ```bash

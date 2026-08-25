@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Simplify project-file configuration with an explicit `*` binding for all project keys and document the one-parent-workspace setup for Windows and Linux.
+
 ## 0.3.0a1 - 2026-08-20
 
 - Rewrite installation and MCP handoff documentation with separate Windows local, Linux local and Linux/VPS remote paths; fix the Unified checkout name and current ChatGPT remote-MCP guidance.

@@ -382,6 +382,40 @@ If public HTTPS is not ready yet, MAPI reports the configured URL without falsel
 
 Continue with [MCP integration](MCP_INTEGRATION.md), section **Linux/VPS: connect ChatGPT web to remote MAPI**.
 
+## Optional: give MAPI access to project files
+
+For a personal/local installation, the simplest approach is to expose one parent workspace directory instead of adding every project separately.
+
+Edit the generated instance `.env`:
+
+- Windows: `%USERPROFILE%\.mapi-agent-memory\.env`
+- Linux: `~/.mapi-agent-memory/.env`
+
+Read-only Windows example:
+
+```dotenv
+MAPI_FILES_ENABLED=true
+MAPI_FILE_ROOTS=C:\Projects
+```
+
+Read-only Linux example:
+
+```dotenv
+MAPI_FILES_ENABLED=true
+MAPI_FILE_ROOTS=/home/name/projects
+```
+
+If the connected assistant should also modify files, use the explicit `*` binding for all project keys in this MAPI instance. This keeps the setup to one workspace root while writes remain guarded.
+
+```dotenv
+MAPI_FILE_WRITE_ENABLED=true
+MAPI_FILE_WRITE_ROOTS=C:\Projects
+MAPI_FILE_PROJECT_ROOTS_JSON={"*":["C:/Projects"]}
+MAPI_FILE_PROJECT_WRITE_ROOTS_JSON={"*":["C:/Projects"]}
+```
+
+Use the corresponding Linux path on Linux. Restart MAPI after editing the file. Protected paths such as `.env`, `.git`, `.ssh` and private-key files remain blocked. See [Configuration](CONFIGURATION.md#project-file-access) for multiple roots, exact project bindings and Linux write examples.
+
 ## Using a custom instance root
 
 All normal runtime commands automatically load the default instance. If you initialized another root, use the same root consistently:

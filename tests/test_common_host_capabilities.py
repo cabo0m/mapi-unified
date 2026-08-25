@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -100,6 +101,26 @@ def test_file_service_blocks_secret_paths(tmp_path: Path) -> None:
     result = service.read_text(root_id="root", relative_path=".env", project_key=None)
     assert result["status"] == "denied"
     assert result["error"] == "protected_path"
+
+
+def test_file_wildcard_project_binding_applies_to_all_projects(tmp_path: Path) -> None:
+    root = (tmp_path / "workspace").resolve()
+    root.mkdir()
+    values = {
+        "MAPI_FILES_ENABLED": "true",
+        "MAPI_FILE_ROOTS": str(root),
+        "MAPI_FILE_WRITE_ENABLED": "true",
+        "MAPI_FILE_WRITE_ROOTS": str(root),
+        "MAPI_FILE_PROJECT_ROOTS_JSON": json.dumps({"*": [str(root)]}),
+        "MAPI_FILE_PROJECT_WRITE_ROOTS_JSON": json.dumps({"*": [str(root)]}),
+    }
+    config = FileCapabilityConfig.from_mapping(values)
+    assert config.validation_errors() == []
+    root_id = config.roots[0].root_id
+    assert config.root_bound_to_project(root_id, "project-a") is True
+    assert config.root_bound_to_project(root_id, "project-b") is True
+    assert config.write_bound_to_project(root_id, "project-a") is True
+    assert config.write_bound_to_project(root_id, "project-b") is True
 
 
 def _git_services(tmp_path: Path):
